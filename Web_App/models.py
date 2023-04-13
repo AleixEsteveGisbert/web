@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 
 
@@ -10,15 +11,10 @@ class Wallet(models.Model):
     #idUser = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
-class User(models.Model):
-    name = models.TextField(null=True)
-    surname = models.TextField(null=True)
-    email = models.TextField()
-    username = models.TextField(null=True)
-    password = models.TextField()
+class UserInfo(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     avatar = models.TextField(null=True)
-    enabled = models.BooleanField(default=True)
-    id_wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE)
+    id_wallet = models.OneToOneField(Wallet, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
