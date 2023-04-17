@@ -22,12 +22,13 @@ from Web_App import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.main_page, name='home'),
-    path('login/', views.login_form, name='login'),
+    path('login', views.login_form, name='login'),
     path('register', views.register_form, name='register'),
+    path('logout', LogoutView.as_view(next_page=settings.LOGOUT_REDIRECT_URL), name='logout'),
 ]
 
 """
 
-    path('logout/', LogoutView.as_view(next_page=settings.LOGOUT_REDIRECT_URL), name='logout'),
+    
     path('register', views.register_form, name='register'),
     """
