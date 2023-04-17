@@ -1,14 +1,18 @@
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 
 from Web_App.forms import LoginForm, RegisterForm
+from Web_App.models import Game
 
 
 # Create your views here.
 # https://www.geeksforgeeks.org/django-templates/
 def main_page(request):
+    games = Game.objects.all()
     context = {
-
+        'games': games
     }
     return render(request, 'mainPage/mainPage.html', context)
 
@@ -35,4 +39,10 @@ def login_form(request):
     else:
         form = LoginForm()
     return render(request, 'mainPage/login.html', {'form': form})
-
+@login_required(login_url='login')
+def dashboard(request):
+    servers = request.user.server_set.all()
+    context = {
+        'servers': servers
+    }
+    return render(request, 'controlPanel/dashboard.html', context)

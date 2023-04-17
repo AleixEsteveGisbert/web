@@ -25,10 +25,9 @@ urlpatterns = [
     path('login', views.login_form, name='login'),
     path('register', views.register_form, name='register'),
     path('logout', LogoutView.as_view(next_page=settings.LOGOUT_REDIRECT_URL), name='logout'),
+
+    # Control Panel URLs
+    path('dashboard', views.dashboard, name='dashboard'),
+
 ]
 
-"""
-
-    
-    path('register', views.register_form, name='register'),
-    """

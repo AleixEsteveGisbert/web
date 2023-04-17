@@ -1,0 +1,6 @@
+{% extends 'controlPanel/template.html' %}
+{% block content %}
+{% for server in servers %}
+    <p>{{ server.game.name }}</p>
+    {% endfor %}
+{% endblock %}
