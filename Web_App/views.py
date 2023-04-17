@@ -35,3 +35,4 @@ def login_form(request):
     else:
         form = LoginForm()
     return render(request, 'mainPage/login.html', {'form': form})
+

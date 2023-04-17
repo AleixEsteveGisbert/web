@@ -1,10 +1,12 @@
 {% extends 'mainPage/template.html' %}
 
 {% block content %}
-  <h2>Registra't</h2>
+    <div class="container col-sm-4">
+  <h1>Registra't</h1>
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Registrarse</button>
+    <button type="submit" class="btn btn-primary">Registrarse</button>
   </form>
+    </div>
 {% endblock %}
