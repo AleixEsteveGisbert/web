@@ -4,7 +4,7 @@ from django.db import models
 
 # Create your models here.
 class Wallet(models.Model):
-    balance = models.DecimalField(decimal_places=8, max_digits=12)
+    balance = models.DecimalField(decimal_places=8, max_digits=12, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     #Foreign key
