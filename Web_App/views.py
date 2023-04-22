@@ -16,6 +16,7 @@ def main_page(request):
     }
     return render(request, 'mainPage/mainPage.html', context)
 
+
 def register_form(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
@@ -26,6 +27,7 @@ def register_form(request):
     else:
         form = RegisterForm()
     return render(request, 'mainPage/register.html', {'form': form})
+
 
 def login_form(request):
     if request.method == 'POST':
@@ -39,6 +41,8 @@ def login_form(request):
     else:
         form = LoginForm()
     return render(request, 'mainPage/login.html', {'form': form})
+
+
 @login_required(login_url='login')
 def dashboard(request):
     servers = request.user.server_set.all()

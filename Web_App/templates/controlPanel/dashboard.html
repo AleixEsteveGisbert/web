@@ -1,6 +1,16 @@
 {% extends 'controlPanel/template.html' %}
+{% block title %}Dashboard | Gamesave{% endblock %}
 {% block content %}
-{% for server in servers %}
-    <p>{{ server.game.name }}</p>
+<div class="d-flex align-items-start">
+  <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+    {% for server in servers %}
+        <button class="nav-link" id="v-pills-{{ server.name }}-tab" data-bs-toggle="pill" data-bs-target="#v-pills-{{ server.name }}" type="button" role="tab" aria-controls="v-pills-{{ server.name }}" aria-selected="true">{{ server.name }} <i class="text-secondary">({{ server.game.name }})</i></button>
     {% endfor %}
+      </div>
+  <div class="tab-content" id="v-pills-tabContent">
+      {% for server in servers %}
+        <div class="tab-pane fade" id="v-{{ server.name }}-home" role="tabpanel" aria-labelledby="v-pills-{{ server.name }}-tab">...</div>
+      {% endfor %}
+  </div>
+</div>
 {% endblock %}

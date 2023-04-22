@@ -26,6 +26,7 @@ class Game(models.Model):
     updated_at = models.DateTimeField(auto_now=True, null=True)
 class Server(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
+    name = models.TextField(default="Server")
     version = models.DecimalField(decimal_places=2, max_digits=8, null=True)
     cores = models.DecimalField(decimal_places=2, max_digits=8, null=True)
     ram = models.DecimalField(decimal_places=2, max_digits=8, null=True)
