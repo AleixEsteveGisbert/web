@@ -1,10 +1,15 @@
+import sys
+
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 
-from Web_App.forms import LoginForm, RegisterForm
-from Web_App.models import Game
+from Web_App.forms import LoginForm, RegisterForm, NewServerForm
+from Web_App.models import Game, Server
+import docker
+
+client = docker.from_env()
 
 
 # Create your views here.
@@ -50,3 +55,54 @@ def dashboard(request):
         'servers': servers
     }
     return render(request, 'controlPanel/dashboard.html', context)
+
+
+@login_required(login_url='login')
+def new_server(request):
+    games = Game.objects.all()
+    if request.method == 'POST':
+        form = NewServerForm(request.POST, request.FILES)
+        if form.is_valid():
+            server = form.save(commit=False)
+            server.id_user = request.user
+            server.game_id = request.POST.get('game')
+            server.save()
+
+            server_name = str(server.id) + "_" + server.name
+            port = '25565'
+            memory_limit = '1G'
+
+            container = client.containers.run(
+                'itzg/minecraft-server',
+                name=server_name,
+                ports={f'{port}/tcp': port, f'{port}/udp': port},
+                environment={
+                    'EULA': 'TRUE',
+                    'VERSION': 'latest',
+                    'MEMORY': memory_limit,
+                },
+                detach=True,
+            )
+
+            return redirect('dashboard')
+    else:
+
+        form = NewServerForm()
+        context = {
+            'form': form,
+            'games': games,
+        }
+
+    return render(request, 'controlPanel/new-server.html', context)
+
+
+def show_server(request, server_id):
+    server = get_object_or_404(Server, id=server_id)
+    container = client.containers.get(str(server.id)+"_"+server.name)
+    container_ip = container.attrs['NetworkSettings']['IPAddress']
+    context = {
+        'server': server,
+        'container_ip': container_ip
+
+    }
+    return render(request, 'controlPanel/show-server.html', context)
