@@ -30,6 +30,5 @@ urlpatterns = [
     path('dashboard', views.dashboard, name='dashboard'),
     path('server/new', views.new_server, name='new-server'),
     path('server/<int:server_id>/show', views.show_server, name='new-server'),
-
 ]
 

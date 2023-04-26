@@ -68,13 +68,12 @@ def new_server(request):
             server.game_id = request.POST.get('game')
             server.save()
 
-            server_name = str(server.id) + "_" + server.name
             port = '25565'
             memory_limit = '1G'
 
             container = client.containers.run(
                 'itzg/minecraft-server',
-                name=server_name,
+                name=server.id,
                 ports={f'{port}/tcp': port, f'{port}/udp': port},
                 environment={
                     'EULA': 'TRUE',
@@ -86,14 +85,9 @@ def new_server(request):
 
             return redirect('dashboard')
     else:
-
         form = NewServerForm()
-        context = {
-            'form': form,
-            'games': games,
-        }
 
-    return render(request, 'controlPanel/new-server.html', context)
+    return render(request, 'controlPanel/new-server.html', {'form': form, 'games': games})
 
 
 def show_server(request, server_id):
