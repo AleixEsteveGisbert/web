@@ -2,14 +2,16 @@ import sys
 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
+from docker.errors import DockerException
 
 from Web_App.forms import LoginForm, RegisterForm, NewServerForm
 from Web_App.models import Game, Server
 import docker
 
-client = docker.from_env()
+from mcstatus import JavaServer
 
 
 # Create your views here.
@@ -71,6 +73,12 @@ def new_server(request):
             port = '25565'
             memory_limit = '1G'
 
+            try:
+                client = docker.from_env()
+            except DockerException:
+                print("Docker is not running")
+                raise Http404("Docker is not running")
+
             container = client.containers.run(
                 'itzg/minecraft-server',
                 name=server.id,
@@ -87,16 +95,68 @@ def new_server(request):
     else:
         form = NewServerForm()
 
-    return render(request, 'controlPanel/new-server.html', {'form': form, 'games': games})
+    return render(request, 'controlPanel/server-new.html', {'form': form, 'games': games})
 
 
+@login_required(login_url='login')
 def show_server(request, server_id):
     server = get_object_or_404(Server, id=server_id)
-    container = client.containers.get(str(server.id)+"_"+server.name)
+
+    try:
+        client = docker.from_env()
+    except DockerException:
+        print("Docker is not running")
+        raise Http404("Docker is not running")
+
+    container = client.containers.get(server.id)
     container_ip = container.attrs['NetworkSettings']['IPAddress']
     context = {
         'server': server,
         'container_ip': container_ip
 
     }
-    return render(request, 'controlPanel/show-server.html', context)
+    return render(request, 'controlPanel/server-show.html', context)
+
+
+@login_required(login_url='login')
+def details_server(request, server_id):
+    server = get_object_or_404(Server, id=server_id)
+    try:
+        client = docker.from_env()
+    except DockerException:
+        print("Docker is not running")
+        raise Http404("Docker is not running")
+
+    container = client.containers.get(str(server.id))
+    container_ip = container.attrs['NetworkSettings']['IPAddress']
+    running = True
+    details = None
+    try:
+        details = JavaServer.lookup(server.address).status()
+    except Exception as e:
+        running = False
+        print(f"Error: {e} - Can't connect to Minecraft Server ({server.name})")
+
+    context = {
+        'server': server,
+        'details': details,
+        'running': running,
+        'container': container,
+        'container_ip': container_ip,
+    }
+
+    return render(request, 'controlPanel/server-details.html', context)
+
+
+@login_required(login_url='login')
+def stop_server(request, server_id):
+    server = get_object_or_404(Server, id=server_id)
+    if server.user == request.user:
+        try:
+            client = docker.from_env()
+        except DockerException:
+            print("Docker is not running")
+            raise Http404("Docker is not running")
+        container = client.containers.get(str(server.id))
+        container.stop()
+    return HttpResponseRedirect("/dashboard")

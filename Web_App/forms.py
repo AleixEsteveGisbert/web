@@ -38,14 +38,12 @@ class RegisterForm(UserCreationForm):
 
 
 class NewServerForm(forms.ModelForm):
-
-    name = forms.CharField(label="Nom del server", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nom del server'}))
-    #game = forms.ModelChoiceField(queryset=Game.objects.values_list('name', flat=True))
+    name = forms.CharField(label="Nom del server",
+                           widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nom del server'}))
+    # game = forms.ModelChoiceField(queryset=Game.objects.values_list('name', flat=True))
 
     name.widget.attrs.update({'class': 'form-control'})
-
 
     class Meta:
         model = Server
         fields = ['name']
-

@@ -1,0 +1,68 @@
+{% extends 'controlPanel/template.html' %}
+{% block title %}{{ server.name }} | Detalls{% endblock %}
+
+{% block content %}
+    <div class="row content">
+        <div class="col-sm-3 sidenav d-flex flex-column flex-shrink-0 p-3" style="width: 280px;">
+            <div class="bg-light">
+                <span class="fs-4">{{ server.name }}</span>
+                <p><b>IP: </b>{{ server.address }}</p>
+                <p><b>Jugadors: </b>{{ details.players.online }}/{{ details.players.max }}</p>
+                <p><b>Versió: </b>{{ details.version.name }}</p>
+                <p>{% if container.status == "running" %}
+                    <span class="badge text-bg-success">{{ container.status }}</span>
+                {% elif container.status == "restarting" %}
+                    <span class="badge text-bg-warning">{{ container.status }}</span>
+                {% else %}
+                    <span class="badge text-bg-danger">{{ container.status }}</span>
+                {% endif %}</p>
+
+
+            </div>
+            <hr>
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" aria-current="page">
+                        <i class="fa-solid fa-house"></i>
+                        Home
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-link">
+                        <i class="fa-solid fa-terminal"></i>
+                        Consola
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-link">
+                        <i class="fa-solid fa-gear"></i>
+                        Configuració
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-link">
+                        <i class="fa-solid fa-folder"></i>
+                        FTP
+                    </a>
+                </li>
+            </ul>
+            <hr>
+        </div>
+        <div class="col-sm-9 mt-3">
+            <div class="btn-group" role="group" aria-label="Server control buttons">
+                {% if container.status == "running" %}
+                    <a type="button" href="{% url 'server-stop' container.name %}" class="btn btn-danger">Aturar</a>
+                {% else %}
+                    <button type="button" class="btn btn-success">Iniciar</button>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+    <script>
+        function aturar() {
+
+        }
+    </script>
+
+{% endblock %}

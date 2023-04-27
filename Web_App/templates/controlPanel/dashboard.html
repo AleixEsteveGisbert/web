@@ -4,11 +4,11 @@
     <div class="container-fluid">
         <div class="row content">
             <div class="col-sm-3 sidenav">
-                <a role="button" href="{% url 'new-server' %}" class="btn btn-primary mt-2">Nou servidor</a>
+                <a role="button" href="{% url 'server-new' %}" class="btn btn-primary mt-2">Nou servidor</a>
             </div>
 
             <div class="col-sm-9">
-                <h4><small>Els meus servidors</small></h4>
+                <h3>Els meus servidors</h3>
                 <div class="row row-cols-1 row-cols-md-3">
                     {% for server in servers %}
                         <div class="col mb-4">
@@ -18,7 +18,7 @@
                                     <h5 class="card-title">{{ server.name }}</h5>
                                     <p class="card-text">Some quick example text to build on the card title and make up
                                         the bulk of the card's content.</p>
-                                    <a href="#" class="btn btn-primary">Modificar</a>
+                                    <a href="{% url 'server-edit' server.id %}" class="btn btn-primary">Detalls</a>
                                 </div>
                             </div>
                         </div>
