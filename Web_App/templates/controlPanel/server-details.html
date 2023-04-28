@@ -10,11 +10,11 @@
                 <p><b>Jugadors: </b>{{ details.players.online }}/{{ details.players.max }}</p>
                 <p><b>Versió: </b>{{ details.version.name }}</p>
                 <p>{% if container.status == "running" %}
-                    <span class="badge text-bg-success">{{ container.status }}</span>
+                    <span class="badge text-bg-success">Running</span>
                 {% elif container.status == "restarting" %}
-                    <span class="badge text-bg-warning">{{ container.status }}</span>
+                    <span class="badge text-bg-warning">Restarting</span>
                 {% else %}
-                    <span class="badge text-bg-danger">{{ container.status }}</span>
+                    <span class="badge text-bg-danger">Stopped</span>
                 {% endif %}</p>
 
 

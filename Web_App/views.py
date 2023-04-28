@@ -159,4 +159,18 @@ def stop_server(request, server_id):
             raise Http404("Docker is not running")
         container = client.containers.get(str(server.id))
         container.stop()
-    return HttpResponseRedirect("/dashboard")
+    return HttpResponseRedirect(f"/server/{server.id}/details")
+
+
+@login_required(login_url='login')
+def stop_server(request, server_id):
+    server = get_object_or_404(Server, id=server_id)
+    if server.user == request.user:
+        try:
+            client = docker.from_env()
+        except DockerException:
+            print("Docker is not running")
+            raise Http404("Docker is not running")
+        container = client.containers.get(str(server.id))
+        container.stop()
+    return HttpResponseRedirect(f"/server/{server.id}/details")
