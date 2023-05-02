@@ -51,9 +51,9 @@
         <div class="col-sm-9 mt-3">
             <div class="btn-group" role="group" aria-label="Server control buttons">
                 {% if container.status == "running" %}
-                    <a type="button" href="{% url 'server-stop' container.name %}" class="btn btn-danger">Aturar</a>
+                    <a role="button" href="{% url 'server-stop' container.name %}" class="btn btn-danger">Aturar</a>
                 {% else %}
-                    <button type="button" class="btn btn-success">Iniciar</button>
+                    <a role="button" href="{% url 'server-start' container.name%}" class="btn btn-success">Iniciar</a>
                 {% endif %}
 
             </div>

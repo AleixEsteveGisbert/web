@@ -2,7 +2,7 @@ import sys
 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from docker.errors import DockerException
@@ -66,9 +66,8 @@ def new_server(request):
         form = NewServerForm(request.POST, request.FILES)
         if form.is_valid():
             server = form.save(commit=False)
-            server.id_user = request.user
+            server.user = request.user
             server.game_id = request.POST.get('game')
-            server.save()
 
             port = '25565'
             memory_limit = '1G'
@@ -79,18 +78,22 @@ def new_server(request):
                 print("Docker is not running")
                 raise Http404("Docker is not running")
 
-            container = client.containers.run(
-                'itzg/minecraft-server',
-                name=server.id,
-                ports={f'{port}/tcp': port, f'{port}/udp': port},
-                environment={
-                    'EULA': 'TRUE',
-                    'VERSION': 'latest',
-                    'MEMORY': memory_limit,
-                },
-                detach=True,
-            )
-
+            server.save()
+            try:
+                container = client.containers.run(
+                    'itzg/minecraft-server',
+                    name=server.id,
+                    ports={f'{port}/tcp': None, f'{port}/udp': None},
+                    environment={
+                        'EULA': 'TRUE',
+                        'VERSION': 'latest',
+                        'MEMORY': memory_limit,
+                    },
+                    detach=True,
+                )
+            except DockerException as e:
+                print("[Error] new_server: " + e.__str__())
+                raise Http404("Error running server")
             return redirect('dashboard')
     else:
         form = NewServerForm()
@@ -163,7 +166,7 @@ def stop_server(request, server_id):
 
 
 @login_required(login_url='login')
-def stop_server(request, server_id):
+def start_server(request, server_id):
     server = get_object_or_404(Server, id=server_id)
     if server.user == request.user:
         try:
@@ -172,5 +175,9 @@ def stop_server(request, server_id):
             print("Docker is not running")
             raise Http404("Docker is not running")
         container = client.containers.get(str(server.id))
-        container.stop()
+        try:
+            container.start()
+        except DockerException as e:
+            print("[Error] start_server: " + e.__str__())
+            return HttpResponse(status=500)
     return HttpResponseRedirect(f"/server/{server.id}/details")
