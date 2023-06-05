@@ -37,6 +37,21 @@
                     <a class="nav-link" href="#"></a>
                 </li>
             </ul>
+            <div class="d-flex align-items-center">
+                    <div class="dropdown text-end">
+                        <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" id="dropdownUser1"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="{{ MEDIA_URL }}/{{ user.userinfo.avatar }}" alt="avatar_img" width="32"
+                                 height="32" class="rounded-circle shadow-4-strong">
+                        </a>
+                        <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1" style="">
+                            <li><a class="dropdown-item" href="/user/{{ user.id }}">El meu perfil</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="{% url 'logout' %}">Tanca la sessió</a></li>
+                        </ul>
+                    </div>
             <!-- Left links -->
         </div>
         <!-- Collapsible wrapper -->

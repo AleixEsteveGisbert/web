@@ -6,7 +6,7 @@
         <div class="col-sm-3 sidenav d-flex flex-column flex-shrink-0 p-3" style="width: 280px;">
             <div class="bg-light">
                 <span class="fs-4">{{ server.name }}</span>
-                <p><b>IP: </b>{{ server.address }}</p><p>{{ container_ip }}</p>
+                <p><b>IP: </b>{{ server.address }}:{{ server.port }}</p>
                 <p><b>Jugadors: </b>{{ details.players.online }}/{{ details.players.max }}</p>
                 <p><b>Versió: </b>{{ details.version.name }}</p>
                 <p>{% if container.status == "running" %}
@@ -16,7 +16,6 @@
                 {% else %}
                     <span class="badge text-bg-danger">Stopped</span>
                 {% endif %}</p>
-
 
             </div>
             <hr>

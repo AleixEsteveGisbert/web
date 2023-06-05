@@ -2,6 +2,13 @@
 {% load static %}
 {% block title %}Dashboard | Gamesave{% endblock %}
 {% block content %}
+    <style>
+        .statusBar {
+            display: inline-block;
+            width: 100%;
+            height: 10px;
+        }
+    </style>
     <div class="container-fluid">
         <div class="row content">
             <div class="col-sm-3 sidenav">
@@ -14,11 +21,17 @@
                     {% for server in servers %}
                         <div class="col mb-4">
                             <div class="card h-100" style="width: 18rem;">
-                                <img src="{% static server.game.image %}" class="card-img-top" alt="{{ server.game.image }}">
+                                <img src="{% static server.game.image %}" class="card-img-top"
+                                     alt="{{ server.game.image }}">
                                 <div class="card-body">
                                     <h5 class="card-title">{{ server.name }}</h5>
                                     <p class="card-text"></p>
                                     <a href="{% url 'server-edit' server.id %}" class="btn btn-primary">Detalls</a>
+                                        {% if server.status == "Running" %}
+                                            <div class="statusBar bg-success"></div>
+                                        {% else %}
+                                            <div class="statusBar bg-danger"></div>
+                                        {% endif %}
                                 </div>
                             </div>
                         </div>
