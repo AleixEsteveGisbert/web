@@ -1,4 +1,5 @@
 {% extends 'controlPanel/template.html' %}
+{% load static %}
 {% block title %}Dashboard | Gamesave{% endblock %}
 {% block content %}
     <div class="container-fluid">
@@ -13,7 +14,7 @@
                     {% for server in servers %}
                         <div class="col mb-4">
                             <div class="card h-100" style="width: 18rem;">
-                                <img src="{{ server.game.image }}" class="card-img-top" alt="{{ server.game.image }}">
+                                <img src="{% static server.game.image %}" class="card-img-top" alt="{{ server.game.image }}">
                                 <div class="card-body">
                                     <h5 class="card-title">{{ server.name }}</h5>
                                     <p class="card-text"></p>
