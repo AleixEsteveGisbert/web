@@ -91,7 +91,11 @@ def new_server(request):
                     },
                     detach=True,
                 )
+                server.address = container.attrs['NetworkSettings']['Ports']
+                print(server.address)
+
             except DockerException as e:
+                server.delete()
                 print("[Error] new_server: " + e.__str__())
                 raise Http404("Error running server")
             return redirect('dashboard')
@@ -108,7 +112,7 @@ def show_server(request, server_id):
     try:
         client = docker.from_env()
     except DockerException:
-        print("Docker is not running")
+        print("[Error] show_server: Docker is not running")
         raise Http404("Docker is not running")
 
     container = client.containers.get(server.id)
@@ -116,7 +120,6 @@ def show_server(request, server_id):
     context = {
         'server': server,
         'container_ip': container_ip
-
     }
     return render(request, 'controlPanel/server-show.html', context)
 
@@ -127,18 +130,18 @@ def details_server(request, server_id):
     try:
         client = docker.from_env()
     except DockerException:
-        print("Docker is not running")
+        print("[Error] details_server: Docker is not running")
         raise Http404("Docker is not running")
 
     container = client.containers.get(str(server.id))
-    container_ip = container.attrs['NetworkSettings']['IPAddress']
+    container_ip = container.attrs['NetworkSettings']['Ports']
     running = True
     details = None
     try:
         details = JavaServer.lookup(server.address).status()
     except Exception as e:
         running = False
-        print(f"Error: {e} - Can't connect to Minecraft Server ({server.name})")
+        print(f"[Error] details_server: {e} - ({server.name})")
 
     context = {
         'server': server,
@@ -158,7 +161,7 @@ def stop_server(request, server_id):
         try:
             client = docker.from_env()
         except DockerException:
-            print("Docker is not running")
+            print("[Error] stop_server: Docker is not running")
             raise Http404("Docker is not running")
         container = client.containers.get(str(server.id))
         container.stop()
@@ -172,7 +175,7 @@ def start_server(request, server_id):
         try:
             client = docker.from_env()
         except DockerException:
-            print("Docker is not running")
+            print("[Error] start_server: Docker is not running")
             raise Http404("Docker is not running")
         container = client.containers.get(str(server.id))
         try:

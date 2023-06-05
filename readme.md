@@ -1,0 +1,5 @@
+# Dependències:
+- django
+- pillow
+- mcstatus
+- 

@@ -16,8 +16,13 @@ Including another URLconf
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.views import LogoutView
-from django.urls import path
+from django.urls import path, re_path
 from Web_App import views
+from Web_App.consumers import MinecraftConsoleConsumer
+
+websocket_urlpatterns = [
+    re_path(r'ws/minecraft_console/$', MinecraftConsoleConsumer.as_asgi()),
+]
 
 urlpatterns = [
     path('admin/', admin.site.urls),

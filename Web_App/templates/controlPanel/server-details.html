@@ -6,7 +6,7 @@
         <div class="col-sm-3 sidenav d-flex flex-column flex-shrink-0 p-3" style="width: 280px;">
             <div class="bg-light">
                 <span class="fs-4">{{ server.name }}</span>
-                <p><b>IP: </b>{{ server.address }}</p>
+                <p><b>IP: </b>{{ server.address }}</p><p>{{ container_ip }}</p>
                 <p><b>Jugadors: </b>{{ details.players.online }}/{{ details.players.max }}</p>
                 <p><b>Versió: </b>{{ details.version.name }}</p>
                 <p>{% if container.status == "running" %}
@@ -20,32 +20,20 @@
 
             </div>
             <hr>
-            <ul class="nav nav-pills flex-column mb-auto">
-                <li class="nav-item">
-                    <a href="#" class="nav-link active" aria-current="page">
-                        <i class="fa-solid fa-house"></i>
-                        Home
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="nav-link">
-                        <i class="fa-solid fa-terminal"></i>
-                        Consola
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="nav-link">
-                        <i class="fa-solid fa-gear"></i>
-                        Configuració
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="nav-link">
-                        <i class="fa-solid fa-folder"></i>
-                        FTP
-                    </a>
-                </li>
-            </ul>
+            <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                <a class="nav-link active" id="v-pills-home-tab" data-toggle="pill" href="#v-pills-home" role="tab"
+                   aria-controls="v-pills-home" aria-selected="true">
+                    <i class="fa-solid fa-house"></i>Home</a>
+                <a class="nav-link" id="v-pills-console-tab" data-toggle="pill" href="#v-pills-console" role="tab"
+                   aria-controls="v-pills-console" aria-selected="false">
+                    <i class="fa-solid fa-terminal"></i>Consola</a>
+                <a class="nav-link" id="v-pills-config-tab" data-toggle="pill" href="#v-pills-config" role="tab"
+                   aria-controls="v-pills-config" aria-selected="false">
+                    <i class="fa-solid fa-gear"></i>Configuració</a>
+                <a class="nav-link" id="v-pills-ftp-tab" data-toggle="pill" href="#v-pills-ftp" role="tab"
+                   aria-controls="v-pills-ftp" aria-selected="false">
+                    <i class="fa-solid fa-folder"></i>FTP</a>
+            </div>
             <hr>
         </div>
         <div class="col-sm-9 mt-3">
@@ -53,15 +41,38 @@
                 {% if container.status == "running" %}
                     <a role="button" href="{% url 'server-stop' container.name %}" class="btn btn-danger">Aturar</a>
                 {% else %}
-                    <a role="button" href="{% url 'server-start' container.name%}" class="btn btn-success">Iniciar</a>
+                    <a role="button" href="{% url 'server-start' container.name %}" class="btn btn-success">Iniciar</a>
                 {% endif %}
 
+            </div>
+            <div class="tab-content" id="v-pills-tabContent">
+                <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel"
+                     aria-labelledby="v-pills-home-tab">
+                    1
+                </div>
+                <div class="tab-pane fade" id="v-pills-console" role="tabpanel" aria-labelledby="v-pills-console-tab">
+                    2
+                </div>
+                <div class="tab-pane fade" id="v-pills-config" role="tabpanel" aria-labelledby="v-pills-config-tab">
+                    3
+                </div>
+                <div class="tab-pane fade" id="v-pills-ftp" role="tabpanel" aria-labelledby="v-pills-ftp-tab">
+                    4
+                </div>
             </div>
         </div>
     </div>
     <script>
-        function aturar() {
+        const socket = new WebSocket('ws://' + window.location.host + '/ws/minecraft_console/');
 
+        socket.onmessage = function (e) {
+            // Manejar los mensajes entrantes de la consola del servidor de Minecraft
+            console.log(e.data);
+        };
+
+        // Envía comandos al servidor de Minecraft
+        function sendCommand(command) {
+            socket.send(command);
         }
     </script>
 
