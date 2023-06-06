@@ -7,10 +7,15 @@ from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from docker.errors import DockerException
+from docker.models.networks import Network
 
 from Web_App.forms import LoginForm, RegisterForm, NewServerForm
 from Web_App.models import Game, Server
 import docker
+
+from django.http import HttpResponse
+from web3 import Web3
+from alchemy import Network, Alchemy
 
 from mcstatus import JavaServer
 
@@ -210,3 +215,16 @@ def delete_server(request, server_id):
             print("[Error] start_server: " + e.__str__())
             return HttpResponse(status=500)
     return HttpResponseRedirect(f"/server/{server.id}/details")
+
+
+@login_required(login_url='login')
+def wallet(request):
+    sepolia = 'https://eth-sepolia.g.alchemy.com/v2/5APA3WpSw2ESkV84Qlcy-4ZgFQW9I9_M'
+    web3 = Web3(Web3.HTTPProvider(sepolia))
+
+    wa = '0xF24F56a34D16B7a1FB2F6f9dbb160911565873f2'
+    balance = web3.from_wei(web3.eth.get_balance(wa), 'ether')
+    context = {
+        'balance': balance,
+    }
+    return render(request, 'controlPanel/wallet.html', context)
