@@ -1,5 +1,67 @@
 {% extends 'controlPanel/template.html' %}
 {% block title %}Wallet | Gamesave{% endblock %}
 {% block content %}
-    <p>{{ balance }}</p>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.3/dist/web3.min.js"></script>
+    <style>
+        .balance-box {
+            background-color: #f8f9fa;
+            border: 1px solid #ced4da;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .icon {
+            font-size: 48px;
+            color: #627eea;
+        }
+    </style>
+    </head>
+    <body>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="balance-box col-6">
+                <i class="fab fa-ethereum icon"></i>
+                <h3>Balance de Ethereum</h3>
+                <p>{{ balance }} ETH</p>
+            </div>
+            <div class="balance-box col-6">
+                <i class="fab fa-ethereum icon"></i>
+                <h3>Balance de Hostcoin</h3>
+                <p>{{ balance }} HCO</p>
+            </div>
+        </div>
+        <div class="row">
+
+        </div>
+    </div>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="balance-box col-12">
+                <i class="fas fa-wallet icon"></i>
+                <h3>Dirección de cartera: </h3>
+                <p style="font-size: 30px" id="walletAddress"></p>
+                <button onclick="getWalletAddress()">Obtener dirección de cartera</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        async function getWalletAddress() {
+            // Comprueba si Metamask está instalado
+            if (typeof window.ethereum !== 'undefined') {
+                // Solicita al usuario el acceso a su cartera
+                await window.ethereum.request({method: 'eth_requestAccounts'});
+                // Obtiene la instancia de web3
+                const web3 = new Web3(window.ethereum);
+                // Obtiene la dirección de la cartera actual
+                const accounts = await web3.eth.getAccounts();
+                const walletAddress = accounts[0];
+                // Muestra la dirección en la página
+                document.getElementById('walletAddress').textContent = `${walletAddress}`;
+            } else {
+                // Metamask no está instalado
+                alert('Por favor, instala Metamask para utilizar esta función.');
+            }
+        }
+    </script>
 {% endblock %}
