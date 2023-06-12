@@ -15,8 +15,6 @@ import docker
 
 from django.http import HttpResponse
 from web3 import Web3
-from alchemy import Network, Alchemy
-
 from mcstatus import JavaServer
 
 
