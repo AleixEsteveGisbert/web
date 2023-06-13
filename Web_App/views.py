@@ -1,6 +1,7 @@
 import sys
 from time import sleep
 
+import websocket
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, HttpResponseRedirect, HttpResponse
@@ -79,7 +80,7 @@ def new_server(request):
                 client = docker.from_env()
             except DockerException:
                 print("Docker is not running")
-                raise Http404("Docker is not running")
+                raise Exception("Docker is not running")
 
             server.save()
             try:
@@ -89,8 +90,12 @@ def new_server(request):
                     ports={f'{MCport}/tcp': None, f'{MCport}/udp': None},
                     environment={
                         'EULA': 'TRUE',
+                        'OVERRIDE_SERVER_PROPERTIES': 'false',
                         'VERSION': 'latest',
                         'MEMORY': memory_limit,
+                        'SERVER_NAME': server.name,
+                        'MOTD': "Welcome to server " + server.name,
+
                     },
                     detach=True,
                 )
@@ -112,7 +117,7 @@ def new_server(request):
             except DockerException as e:
                 server.delete()
                 print("[Error] new_server: " + e.__str__())
-                raise Http404("Error running server")
+                raise Exception("Error running server")
             return redirect('dashboard')
     else:
         form = NewServerForm()
@@ -123,28 +128,34 @@ def new_server(request):
 @login_required(login_url='login')
 def details_server(request, server_id):
     server = get_object_or_404(Server, id=server_id)
-    try:
-        client = docker.from_env()
-    except DockerException:
-        print("[Error] details_server: Docker is not running")
-        raise Http404("Docker is not running")
+    if server.user == request.user:
+        try:
+            client = docker.from_env()
+        except DockerException:
+            server.status = "Stopped"
+            server.save()
+            print("[Error] details_server: Docker is not running")
+            raise Exception("Docker is not running")
 
-    container = client.containers.get(str(server.id))
-    running = True
-    details = None
-    try:
-        details = JavaServer.lookup(server.address + ":" + str(server.port)).status()
-    except Exception as e:
-        running = False
-        print(f"[Error] details_server: {e} - ({server.name})")
+        container = client.containers.get(str(server.id))
+        if container.status == "running:":
+            server.status = "Running"
+        else:
+            server.status = "Stopped"
 
-    context = {
-        'server': server,
-        'details': details,
-        'running': running,
-        'container': container,
-    }
+        details = None
+        try:
+            details = JavaServer.lookup(server.address + ":" + str(server.port)).status()
+        except Exception as e:
+            print(f"[Error] details_server: {e} - ({server.name})")
 
+        context = {
+            'server': server,
+            'details': details,
+            'container': container,
+        }
+    else:
+        return HttpResponse(status=403)
     return render(request, 'controlPanel/server-details.html', context)
 
 
@@ -156,12 +167,37 @@ def stop_server(request, server_id):
             client = docker.from_env()
         except DockerException:
             print("[Error] stop_server: Docker is not running")
-            raise Http404("Docker is not running")
-        container = client.containers.get(str(server.id))
-        container.stop()
-        server.status = "Stopped"
-        server.save()
+            raise Exception("Docker is not running")
+        try:
+            container = client.containers.get(str(server.id))
+            container.stop()
+            server.status = "Stopped"
+            server.save()
+        except DockerException:
+            print("[Error] stop_server: Can't stop server")
+            raise Exception("Docker is not running")
+    else:
+        return HttpResponse(status=403)
     return HttpResponseRedirect(f"/server/{server.id}/details")
+
+
+@login_required(login_url='login')
+def update_servers(request):
+    servers = request.user.server_set.all()
+    for server in servers:
+        try:
+            client = docker.from_env()
+            container = client.containers.get(str(server.id))
+            if container.status == "running":
+                server.status = "Running"
+            else:
+                server.status = "Stopped"
+            server.save()
+
+        except DockerException as e:
+            print(f"[Error] update_servers: {e}")
+            raise Exception(e)
+    return HttpResponseRedirect("/dashboard")
 
 
 @login_required(login_url='login')
@@ -172,10 +208,19 @@ def start_server(request, server_id):
             client = docker.from_env()
         except DockerException as e:
             print("[Error] start_server: Docker is not running")
-            raise Http404("Docker is not running")
+            raise Exception("Docker is not running")
         container = client.containers.get(str(server.id))
         try:
+
             container.start()
+            try:
+                result = container.exec_run("export MEMORY=3G", environment=
+                {
+                    'MEMORY': '2G',
+                })
+                print(result)
+            except DockerException as err:
+                print("NOSEKE: " + err.__str__())
             MCport = '25565'
             # Configurem un sleep per a esperar fins que el contenidor estigui funcionant per a poder obtenir el port
             timeout = 120
@@ -186,16 +231,23 @@ def start_server(request, server_id):
                 elapsed_time += stop_time
                 container.reload()
                 continue
+
+            # Verificar que la variable de entorno se haya actualizado
+            new_env = container.attrs['Config']['Env']
+            print(new_env)
+            server.status = "Running"
             # Agafem tots els ports del contenidor
             ports = container.attrs['NetworkSettings']['Ports']
             # I ens quedem amb el port TCP
             server.port = ports[f'{MCport}/tcp'][0]['HostPort']
-            server.status = "Running"
             server.save()
         except DockerException as e:
             print("[Error] start_server: " + e.__str__())
             return HttpResponse(status=500)
+    else:
+        return HttpResponse(status=403)
     return HttpResponseRedirect(f"/server/{server.id}/details")
+
 
 @login_required(login_url='login')
 def delete_server(request, server_id):
@@ -205,13 +257,15 @@ def delete_server(request, server_id):
             client = docker.from_env()
         except DockerException:
             print("[Error] start_server: Docker is not running")
-            raise Http404("Docker is not running")
+            raise Exception("Docker is not running")
         container = client.containers.get(str(server.id))
         try:
             container.start()
         except DockerException as e:
-            print("[Error] start_server: " + e.__str__())
+            print("[Error] delete_server: " + e.__str__())
             return HttpResponse(status=500)
+    else:
+        return HttpResponse(status=403)
     return HttpResponseRedirect(f"/server/{server.id}/details")
 
 

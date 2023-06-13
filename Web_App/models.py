@@ -41,7 +41,7 @@ class Server(models.Model):
     ram = models.DecimalField(decimal_places=2, max_digits=8, null=True)
     storage = models.DecimalField(decimal_places=2, max_digits=8, null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    status = models.TextField(default="Sopped")
+    status = models.TextField(null=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 

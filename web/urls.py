@@ -35,6 +35,7 @@ urlpatterns = [
     # Control Panel URLs
     path('dashboard', views.dashboard, name='dashboard'),
     path('server/new', views.new_server, name='server-new'),
+    path('updateservers', views.update_servers, name='update-servers'),
     path('server/<int:server_id>/stop', views.stop_server, name='server-stop'),
     path('server/<int:server_id>/start', views.start_server, name='server-start'),
     path('server/<int:server_id>/details', views.details_server, name='server-edit'),

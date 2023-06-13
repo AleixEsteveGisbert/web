@@ -17,6 +17,7 @@
 
             <div class="col-sm-9">
                 <h3>Els meus servidors</h3>
+                <a role="button" class="btn btn-primary mb-3" href="{% url 'update-servers' %}"><i class="fa-solid fa-rotate-right"></i></a>
                 <div class="row row-cols-1 row-cols-md-3">
                     {% for server in servers %}
                         <div class="col mb-4">
@@ -27,11 +28,11 @@
                                     <h5 class="card-title">{{ server.name }}</h5>
                                     <p class="card-text"></p>
                                     <a href="{% url 'server-edit' server.id %}" class="btn btn-primary">Detalls</a>
-                                        {% if server.status == "Running" %}
-                                            <div class="statusBar bg-success"></div>
-                                        {% else %}
-                                            <div class="statusBar bg-danger"></div>
-                                        {% endif %}
+                                    {% if server.status == "Running" %}
+                                        <div class="statusBar bg-success"></div>
+                                    {% else %}
+                                        <div class="statusBar bg-danger"></div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
