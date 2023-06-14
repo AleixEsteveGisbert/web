@@ -32,7 +32,7 @@ class RegisterForm(UserCreationForm):
         if commit:
             user.save()
             wallet = Wallet.objects.create()
-            userInfo = UserInfo.objects.create(user=user, id_wallet=wallet, avatar='avatars/default_avatar.png')
+            userInfo = UserInfo.objects.create(user=user, wallet=wallet, avatar='avatars/default_avatar.png')
 
         return user
 
@@ -48,3 +48,9 @@ class NewServerForm(forms.ModelForm):
     class Meta:
         model = Server
         fields = ['name']
+
+
+class MinecraftServerPropertiesForm(forms.Form):
+    server_name = forms.CharField(label='Nom del servidor', widget=forms.TextInput(attrs={'class': 'form-control'}))
+    max_players = forms.IntegerField(label='Número de jugadors', widget=forms.TextInput(attrs={'class': 'form-control'}))
+

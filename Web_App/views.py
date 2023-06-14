@@ -10,7 +10,7 @@ from django.urls import reverse
 from docker.errors import DockerException
 from docker.models.networks import Network
 
-from Web_App.forms import LoginForm, RegisterForm, NewServerForm
+from Web_App.forms import LoginForm, RegisterForm, NewServerForm, MinecraftServerPropertiesForm
 from Web_App.models import Game, Server
 import docker
 
@@ -19,8 +19,9 @@ from web3 import Web3
 from mcstatus import JavaServer
 
 
-# Create your views here.
 # https://www.geeksforgeeks.org/django-templates/
+
+MCport = '25565'
 def main_page(request):
     games = Game.objects.all()
     context = {
@@ -73,7 +74,6 @@ def new_server(request):
             server = form.save(commit=False)
             server.user = request.user
             server.game_id = request.POST.get('game')
-            MCport = '25565'
             memory_limit = '1G'
 
             try:
@@ -149,7 +149,9 @@ def details_server(request, server_id):
         except Exception as e:
             print(f"[Error] details_server: {e} - ({server.name})")
 
+        form = MinecraftServerPropertiesForm()
         context = {
+            'form': form,
             'server': server,
             'details': details,
             'container': container,
@@ -211,17 +213,7 @@ def start_server(request, server_id):
             raise Exception("Docker is not running")
         container = client.containers.get(str(server.id))
         try:
-
             container.start()
-            try:
-                result = container.exec_run("export MEMORY=3G", environment=
-                {
-                    'MEMORY': '2G',
-                })
-                print(result)
-            except DockerException as err:
-                print("NOSEKE: " + err.__str__())
-            MCport = '25565'
             # Configurem un sleep per a esperar fins que el contenidor estigui funcionant per a poder obtenir el port
             timeout = 120
             stop_time = 3
@@ -232,9 +224,42 @@ def start_server(request, server_id):
                 container.reload()
                 continue
 
-            # Verificar que la variable de entorno se haya actualizado
-            new_env = container.attrs['Config']['Env']
-            print(new_env)
+            server.status = "Running"
+            # Agafem tots els ports del contenidor
+            ports = container.attrs['NetworkSettings']['Ports']
+            # I ens quedem amb el port TCP
+            server.port = ports[f'{MCport}/tcp'][0]['HostPort']
+            server.save()
+        except DockerException as e:
+            print("[Error] start_server: " + e.__str__())
+            return HttpResponse(status=500)
+    else:
+        return HttpResponse(status=403)
+    return HttpResponseRedirect(f"/server/{server.id}/details")
+@login_required(login_url='login')
+def restart_server(request, server_id):
+    server = get_object_or_404(Server, id=server_id)
+    if server.user == request.user:
+        try:
+            client = docker.from_env()
+        except DockerException as e:
+            print("[Error] start_server: Docker is not running")
+            raise Exception("Docker is not running")
+        container = client.containers.get(str(server.id))
+        try:
+            container.restart()
+            sleep(3)
+            container.reload()
+            # Configurem un sleep per a esperar fins que el contenidor estigui funcionant per a poder obtenir el port
+            timeout = 120
+            stop_time = 3
+            elapsed_time = 0
+            while elapsed_time < timeout and container.status != 'running':
+                sleep(stop_time)
+                elapsed_time += stop_time
+                container.reload()
+                continue
+
             server.status = "Running"
             # Agafem tots els ports del contenidor
             ports = container.attrs['NetworkSettings']['Ports']
@@ -260,13 +285,15 @@ def delete_server(request, server_id):
             raise Exception("Docker is not running")
         container = client.containers.get(str(server.id))
         try:
-            container.start()
+            container.stop()
+            container.remove()
         except DockerException as e:
             print("[Error] delete_server: " + e.__str__())
             return HttpResponse(status=500)
+        server.delete()
     else:
         return HttpResponse(status=403)
-    return HttpResponseRedirect(f"/server/{server.id}/details")
+    return HttpResponseRedirect("/dashboard")
 
 
 @login_required(login_url='login')

@@ -3,11 +3,6 @@
 {% block title %}Dashboard | Gamesave{% endblock %}
 {% block content %}
     <style>
-        .statusBar {
-            display: inline-block;
-            width: 100%;
-            height: 10px;
-        }
     </style>
     <div class="container-fluid">
         <div class="row content">
@@ -17,22 +12,71 @@
 
             <div class="col-sm-9">
                 <h3>Els meus servidors</h3>
-                <a role="button" class="btn btn-primary mb-3" href="{% url 'update-servers' %}"><i class="fa-solid fa-rotate-right"></i></a>
+                <a role="button" class="btn btn-primary mb-3" href="{% url 'update-servers' %}">
+                    <i class="fa-solid fa-rotate-right"></i></a>
                 <div class="row row-cols-1 row-cols-md-3">
                     {% for server in servers %}
                         <div class="col mb-4">
-                            <div class="card h-100" style="width: 18rem;">
+                            <div class="card border
+                            {% if server.status == "Running" %}
+                            border-success
+                            {% else %}
+                            border-danger
+                            {% endif %}
+                            border-2 h-100" style="width: 18rem;">
                                 <img src="{% static server.game.image %}" class="card-img-top"
                                      alt="{{ server.game.image }}">
                                 <div class="card-body">
                                     <h5 class="card-title">{{ server.name }}</h5>
                                     <p class="card-text"></p>
-                                    <a href="{% url 'server-edit' server.id %}" class="btn btn-primary">Detalls</a>
-                                    {% if server.status == "Running" %}
-                                        <div class="statusBar bg-success"></div>
-                                    {% else %}
-                                        <div class="statusBar bg-danger"></div>
-                                    {% endif %}
+                                    <div class="container">
+                                        <div class="row mb-2">
+                                            <div class="col">
+                                                <a href="{% url 'server-edit' server.id %}"
+                                                   class="btn btn-primary">Detalls</a>
+                                            </div>
+                                            <div class="col"></div>
+                                            <div class="col">
+                                                <!-- Button trigger modal -->
+                                                <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                                                        data-bs-target="#Modal{{ server.id }}">
+                                                    <i class="fa-solid fa-trash-can"></i>
+                                                </button>
+
+                                                <!-- Delete Modal -->
+                                                <div class="modal fade" id="Modal{{ server.id }}" tabindex="-1"
+                                                     aria-labelledby="ModalLabel{{ server.id }}" aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content text-danger">
+                                                            <div class="modal-header">
+                                                                <h1 class="modal-title fs-5"
+                                                                    id="ModalLabel{{ server.id }}">
+                                                                    Eliminar servidor</h1>
+                                                                <button type="button" class="btn-close"
+                                                                        data-bs-dismiss="modal"
+                                                                        aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                Estas segur que vols eliminar el servidor
+                                                                <b>{{ server.name }}</b><br>
+                                                                No podras recuperar el servidor!
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary"
+                                                                        data-bs-dismiss="modal">Cancelar
+                                                                </button>
+                                                                <a type="button" role="button" class="btn btn-danger"
+                                                                   href="{% url 'server-delete' server.id %}">Eliminar</a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+
                                 </div>
                             </div>
                         </div>

@@ -38,6 +38,8 @@ urlpatterns = [
     path('updateservers', views.update_servers, name='update-servers'),
     path('server/<int:server_id>/stop', views.stop_server, name='server-stop'),
     path('server/<int:server_id>/start', views.start_server, name='server-start'),
+    path('server/<int:server_id>/restart', views.restart_server, name='server-restart'),
+    path('server/<int:server_id>/delete', views.delete_server, name='server-delete'),
     path('server/<int:server_id>/details', views.details_server, name='server-edit'),
 
     # Wallet URLs
