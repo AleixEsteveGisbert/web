@@ -4,7 +4,6 @@ from time import sleep
 import websocket
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
-from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from docker.errors import DockerException
@@ -18,10 +17,11 @@ from django.http import HttpResponse
 from web3 import Web3
 from mcstatus import JavaServer
 
-
 # https://www.geeksforgeeks.org/django-templates/
 
 MCport = '25565'
+
+
 def main_page(request):
     games = Game.objects.all()
     context = {
@@ -124,38 +124,54 @@ def new_server(request):
 
     return render(request, 'controlPanel/server-new.html', {'form': form, 'games': games})
 
+def MC_update_server_properties(server, ):
+    return True
 
 @login_required(login_url='login')
 def details_server(request, server_id):
     server = get_object_or_404(Server, id=server_id)
     if server.user == request.user:
-        try:
-            client = docker.from_env()
-        except DockerException:
-            server.status = "Stopped"
-            server.save()
-            print("[Error] details_server: Docker is not running")
-            raise Exception("Docker is not running")
+        if request.method == 'POST':
+            form = MinecraftServerPropertiesForm(request.POST)
+            if form.is_valid():
+                server_name = form.cleaned_data['server_name']
+                max_players = form.cleaned_data['max_players']
+                # Obtener otros datos del formulario
 
-        container = client.containers.get(str(server.id))
-        if container.status == "running:":
-            server.status = "Running"
+                # Actualizar el archivo server.properties dentro del contenedor
+                MC_update_server_properties(server_name, max_players)
+                # Actualizar otros datos del archivo server.properties
+
+                return redirect('server-edit', server.id)
         else:
-            server.status = "Stopped"
+            form = MinecraftServerPropertiesForm()
+            try:
+                client = docker.from_env()
+            except DockerException:
+                server.status = "Stopped"
+                server.save()
+                print("[Error] details_server: Docker is not running")
+                raise Exception("Docker is not running")
 
-        details = None
-        try:
-            details = JavaServer.lookup(server.address + ":" + str(server.port)).status()
-        except Exception as e:
-            print(f"[Error] details_server: {e} - ({server.name})")
+            container = client.containers.get(str(server.id))
+            if container.status == "running:":
+                server.status = "Running"
+            else:
+                server.status = "Stopped"
 
-        form = MinecraftServerPropertiesForm()
-        context = {
-            'form': form,
-            'server': server,
-            'details': details,
-            'container': container,
-        }
+            details = None
+            try:
+                details = JavaServer.lookup(server.address + ":" + str(server.port)).status()
+            except Exception as e:
+                print(f"[Error] details_server: {e} - ({server.name})")
+
+
+            context = {
+                'form': form,
+                'server': server,
+                'details': details,
+                'container': container,
+            }
     else:
         return HttpResponse(status=403)
     return render(request, 'controlPanel/server-details.html', context)
@@ -180,7 +196,7 @@ def stop_server(request, server_id):
             raise Exception("Docker is not running")
     else:
         return HttpResponse(status=403)
-    return HttpResponseRedirect(f"/server/{server.id}/details")
+    return redirect('server-edit', server.id)
 
 
 @login_required(login_url='login')
@@ -199,7 +215,7 @@ def update_servers(request):
         except DockerException as e:
             print(f"[Error] update_servers: {e}")
             raise Exception(e)
-    return HttpResponseRedirect("/dashboard")
+    return redirect("/dashboard")
 
 
 @login_required(login_url='login')
@@ -235,7 +251,9 @@ def start_server(request, server_id):
             return HttpResponse(status=500)
     else:
         return HttpResponse(status=403)
-    return HttpResponseRedirect(f"/server/{server.id}/details")
+    return redirect(f"/server/{server.id}/details")
+
+
 @login_required(login_url='login')
 def restart_server(request, server_id):
     server = get_object_or_404(Server, id=server_id)
@@ -267,11 +285,11 @@ def restart_server(request, server_id):
             server.port = ports[f'{MCport}/tcp'][0]['HostPort']
             server.save()
         except DockerException as e:
-            print("[Error] start_server: " + e.__str__())
+            print("[Error] restart_server: " + e.__str__())
             return HttpResponse(status=500)
     else:
         return HttpResponse(status=403)
-    return HttpResponseRedirect(f"/server/{server.id}/details")
+    return redirect('server-edit', server.id)
 
 
 @login_required(login_url='login')
@@ -293,7 +311,7 @@ def delete_server(request, server_id):
         server.delete()
     else:
         return HttpResponse(status=403)
-    return HttpResponseRedirect("/dashboard")
+    return redirect('dashboard')
 
 
 @login_required(login_url='login')
