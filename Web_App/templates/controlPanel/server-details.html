@@ -5,8 +5,10 @@
     <div class="row content">
         <div class="col-sm-3 sidenav d-flex flex-column flex-shrink-0 p-3" style="width: 280px;">
             <div class="bg-light">
-                <span class="fs-4">{{ server.name }}</span>
+                {% load static %}
+                <span class="fs-4"><img src="{% static server.game.image %}" height="50rem">{{ server.name }}</span>
                 <p><b>IP: </b>{{ server.address }}:{{ server.port }}</p>
+                <hr>
                 <p><b>Jugadors: </b>{{ details.players.online }}/{{ details.players.max }}</p>
                 <p><b>Versió: </b>{{ details.version.name }}</p>
                 <p>{% if container.status == "running" %}
@@ -95,9 +97,10 @@
                 <div class="tab-pane fade" id="v-pills-config" role="tabpanel" aria-labelledby="v-pills-config-tab"
                      tabindex="0">
                     <div>
-                        {% csrf_token %}
-                        <form method="POST">
+
+                        <form method="POST">{% csrf_token %}
                             {{ form.as_p }}
+                            <button class="btn btn-primary" type="submit">Guardar els canvis</button>
                         </form>
                     </div>
                 </div>

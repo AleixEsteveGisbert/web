@@ -124,47 +124,53 @@ def new_server(request):
 
     return render(request, 'controlPanel/server-new.html', {'form': form, 'games': games})
 
-def MC_update_server_properties(server, ):
-    return True
+
+def getFile(path, container):
+    command_read = f'cat {path}'
+    result = container.exec_run(command_read)
+    current_content = result.output.decode('utf-8')
+    return current_content
+
+
+def updateFile(data, path, container):
+    command_write = f'echo "{data}" > {path}'
+    result = container.exec_run(command_write, detach=False)  # TODO
+    return result.exit_code
+
 
 @login_required(login_url='login')
 def details_server(request, server_id):
     server = get_object_or_404(Server, id=server_id)
     if server.user == request.user:
+        try:
+            client = docker.from_env()
+        except DockerException:
+            server.status = "Stopped"
+            server.save()
+            print("[Error] details_server: Docker is not running")
+            raise Exception("Docker is not running")
+        container = client.containers.get(str(server.id))
+
         if request.method == 'POST':
             form = MinecraftServerPropertiesForm(request.POST)
             if form.is_valid():
-                server_name = form.cleaned_data['server_name']
-                max_players = form.cleaned_data['max_players']
-                # Obtener otros datos del formulario
-
-                # Actualizar el archivo server.properties dentro del contenedor
-                MC_update_server_properties(server_name, max_players)
-                # Actualizar otros datos del archivo server.properties
-
+                server_properties = form.cleaned_data['server_properties']
+                updateFile(server_properties, '/data/server.properties', container)
                 return redirect('server-edit', server.id)
         else:
-            form = MinecraftServerPropertiesForm()
-            try:
-                client = docker.from_env()
-            except DockerException:
-                server.status = "Stopped"
-                server.save()
-                print("[Error] details_server: Docker is not running")
-                raise Exception("Docker is not running")
+            serverproperties = getFile('/data/server.properties', container)
+            form = MinecraftServerPropertiesForm(initial={'server_properties': serverproperties})
 
-            container = client.containers.get(str(server.id))
             if container.status == "running:":
                 server.status = "Running"
             else:
                 server.status = "Stopped"
-
             details = None
+
             try:
                 details = JavaServer.lookup(server.address + ":" + str(server.port)).status()
             except Exception as e:
                 print(f"[Error] details_server: {e} - ({server.name})")
-
 
             context = {
                 'form': form,

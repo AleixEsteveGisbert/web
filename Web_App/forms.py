@@ -51,6 +51,6 @@ class NewServerForm(forms.ModelForm):
 
 
 class MinecraftServerPropertiesForm(forms.Form):
-    server_name = forms.CharField(label='Nom del servidor', widget=forms.TextInput(attrs={'class': 'form-control'}))
-    max_players = forms.IntegerField(label='Número de jugadors', widget=forms.TextInput(attrs={'class': 'form-control'}))
+    server_properties = forms.CharField(label='server.properties', widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '25'}))
+
 
