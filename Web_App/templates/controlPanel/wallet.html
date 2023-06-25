@@ -45,7 +45,20 @@
             </div>
         </div>
     </div>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="balance-box col-12">
+                <button onclick="buyHostCoins()">Comprar HostCoins</button>
+            </div>
+        </div>
+    </div>
+    <button onclick="setER()">KEVINBOBO</button>
     <script>
+        contractAddress = '0x9bd113f79D9bCdc27E06bDc5a08A27c274512Ee8'; // SmartContract TokenExchange1
+        var walletAddress;
+
+        //Actualitza tots els valors
         async function getWalletAddress() {
             // Comprueba si Metamask está instalado
             if (typeof window.ethereum !== 'undefined') {
@@ -55,7 +68,7 @@
                 const web3 = new Web3(window.ethereum);
                 // Obtiene la dirección de la cartera actual
                 const accounts = await web3.eth.getAccounts();
-                const walletAddress = accounts[0];
+                walletAddress = accounts[0];
                 // Muestra la dirección en la página
                 document.getElementById('walletAddress').textContent = `${walletAddress}`;
                 // AAA
@@ -66,9 +79,9 @@
             }
         }
 
+        //Agafa el valor the ETH i HostCoins, es crida des de getWalletAdress()
         function getBalances(walletAddress) {
             console.log("Funcio getBalances")
-            const contractAddress = '0x9bd113f79D9bCdc27E06bDc5a08A27c274512Ee8'; // SmartContract TokenExchange1
 
             const web3 = new Web3(window.ethereum);
             const tokenExchangeContract = new web3.eth.Contract(contractAbi, contractAddress);
@@ -92,6 +105,52 @@
                     console.error(error);
                 });
 
+        }
+
+        // Comprar HostCoin
+        function buyHostCoins() {
+            console.log("Funcio compra HostCoins");
+            const amountEth = 0.001; //Cantitat de ETH
+
+            var address = walletAddress
+
+            const web3 = new Web3(window.ethereum);
+            const tokenExchangeContract = new web3.eth.Contract(contractAbi, contractAddress);
+
+            tokenExchangeContract.methods.buyTokens().send({
+                from: address,
+                value: web3.utils.toWei(String(amountEth), 'ether')
+            })
+                .on('transactionHash', (hash) => {
+                    console.log('Transacción enviada', hash);
+                })
+                .on('confirmation', (confirmationNumber, receipt) => {
+                    console.log('Confirmación recibida:', confirmationNumber);
+                    getWalletAddress();
+                })
+                .on('error', (error) => {
+                    console.error('Error en la transacción:', error);
+                })
+        }
+
+        //exchange rate
+        function setER() {
+            const newRate = 172413; // Nuevo valor para la tasa de cambio
+
+            var address = walletAddress
+
+            const web3 = new Web3(window.ethereum);
+            const tokenExchangeContract = new web3.eth.Contract(contractAbi, contractAddress);
+
+            tokenExchangeContract.methods.setExchangeRate(newRate).send({
+                from: address,
+            })
+                .then(() => {
+                    console.log('Tasa de cambio actualizada correctamente.');
+                })
+                .catch(error => {
+                    console.error('Error al actualizar la tasa de cambio:', error);
+                });
         }
 
         contractAbi = [
