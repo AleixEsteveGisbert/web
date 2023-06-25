@@ -53,10 +53,23 @@
             </div>
         </div>
     </div>
-    <button onclick="setER()">KEVINBOBO</button>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="balance-box col-12">
+                <button onclick="setER()">SetExchangeRate</button>
+                <button onclick="buyOneToken()">Gastar 1 HOC</button>
+                <button onclick="getExchangeRate()">GET ER</button>
+            </div>
+        </div>
+    </div>
+
+
     <script>
-        contractAddress = '0x9bd113f79D9bCdc27E06bDc5a08A27c274512Ee8'; // SmartContract TokenExchange1
+        //contractAddress = '0x9bd113f79D9bCdc27E06bDc5a08A27c274512Ee8'; // SmartContract TokenExchange1
+        contractAddress = '0x7Bd57f1a0f45Eb5C005C07Ef09820D92a2299de4';
         var walletAddress;
+        var er;
 
         //Actualitza tots els valors
         async function getWalletAddress() {
@@ -72,6 +85,7 @@
                 // Muestra la dirección en la página
                 document.getElementById('walletAddress').textContent = `${walletAddress}`;
                 // AAA
+                getExchangeRate();
                 getBalances(walletAddress);
             } else {
                 // Metamask no está instalado
@@ -91,7 +105,7 @@
                     console.error(error);
                 } else {
                     console.log(`El saldo de HostCoin en la cartera ${walletAddress} es: ${balance}`);
-                    document.getElementById('HOCbalance').textContent = '${balance} HOC';
+                    document.getElementById('HOCbalance').textContent = `${balance} HOC`;
                 }
             });
 
@@ -110,16 +124,18 @@
         // Comprar HostCoin
         function buyHostCoins() {
             console.log("Funcio compra HostCoins");
-            const amountEth = 0.0058; //Cantitat de ETH
+            const amountEth = 0.0000058; //Cantitat de ETH
 
             var address = walletAddress
 
             const web3 = new Web3(window.ethereum);
             const tokenExchangeContract = new web3.eth.Contract(contractAbi, contractAddress);
 
+            const amountWei = web3.utils.toBN(web3.utils.toWei(String(amountEth), 'ether'));
+
             tokenExchangeContract.methods.buyTokens().send({
                 from: address,
-                value: web3.utils.toWei(String(amountEth), 'ether')
+                value: amountWei.toString()
             })
                 .on('transactionHash', (hash) => {
                     console.log('Transacción enviada', hash);
@@ -133,6 +149,8 @@
                 })
         }
 
+
+        //TESTING
         //exchange rate
         function setER() {
             const newRate = 172413; // Nuevo valor para la tasa de cambio
@@ -153,6 +171,28 @@
                 });
         }
 
+        //Get exchange rate
+        function getExchangeRate() {
+            // Obtén la instancia de Web3
+            const web3 = new Web3(window.ethereum);
+
+            // Crea una instancia del contrato TokenExchange
+            const tokenExchangeContract = new web3.eth.Contract(contractAbi, contractAddress);
+
+            // Obtiene la tasa de cambio del contrato
+            tokenExchangeContract.methods.exchangeRate().call((error, rate) => {
+                if (error) {
+                    console.error(error);
+                } else {
+                    // Convierte el valor de la tasa de cambio a un número
+                    const exchangeRate = Number(rate);
+                     er = exchangeRate;
+                    // Haz algo con el valor de la tasa de cambio
+                    console.log('Tasa de cambio actual:', exchangeRate);
+                }
+            });
+        }
+
         contractAbi = [
             {
                 "inputs": [],
@@ -160,6 +200,49 @@
                 "outputs": [],
                 "stateMutability": "payable",
                 "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "initialRate",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "nonpayable",
+                "type": "constructor"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "recipient",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "amount",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "ETHWithdrawn",
+                "type": "event"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "newRate",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "ExchangeRateUpdated",
+                "type": "event"
             },
             {
                 "inputs": [
@@ -178,25 +261,14 @@
                 "inputs": [
                     {
                         "internalType": "uint256",
-                        "name": "initialRate",
+                        "name": "amount",
                         "type": "uint256"
                     }
                 ],
+                "name": "spendTokens",
+                "outputs": [],
                 "stateMutability": "nonpayable",
-                "type": "constructor"
-            },
-            {
-                "anonymous": false,
-                "inputs": [
-                    {
-                        "indexed": false,
-                        "internalType": "uint256",
-                        "name": "newRate",
-                        "type": "uint256"
-                    }
-                ],
-                "name": "ExchangeRateUpdated",
-                "type": "event"
+                "type": "function"
             },
             {
                 "anonymous": false,
@@ -222,6 +294,38 @@
                 ],
                 "name": "TokensPurchased",
                 "type": "event"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "spender",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "amount",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "TokensSpent",
+                "type": "event"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "amount",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "withdrawETH",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
             },
             {
                 "inputs": [
