@@ -49,7 +49,7 @@
     <div class="container mt-4">
         <div class="row">
             <div class="balance-box col-12">
-                <button onclick="buyHostCoins()">Comprar HostCoins</button>
+                <button onclick="buyOneHostCoin()">Comprar 1 HostCoin</button>
             </div>
         </div>
     </div>
@@ -57,9 +57,9 @@
     <div class="container mt-4">
         <div class="row">
             <div class="balance-box col-12">
-                <button onclick="setER()">SetExchangeRate</button>
-                <button onclick="buyOneToken()">Gastar 1 HOC</button>
-                <button onclick="getExchangeRate()">GET ER</button>
+                <button onclick="">tumba</button>
+                <button onclick="">lacasa</button>
+                <button onclick="">mami</button>
             </div>
         </div>
     </div>
@@ -67,7 +67,10 @@
 
     <script>
         //contractAddress = '0x9bd113f79D9bCdc27E06bDc5a08A27c274512Ee8'; // SmartContract TokenExchange1
-        contractAddress = '0x7Bd57f1a0f45Eb5C005C07Ef09820D92a2299de4';
+        //contractAddress = '0x7Bd57f1a0f45Eb5C005C07Ef09820D92a2299de4';
+        //contractAddress = '0xd9145CCE52D386f254917e481eB44e9943F39138'; // 4
+        //contractAddress = '0xd8b934580fcE35a11B58C6D73aDeE468a2833fa8'; // 5
+        contractAddress = '0x0Ff0705efe9fb8A300047A365f39BEFfA86D7c6f'; // NOSEKIN IA
         var walletAddress;
         var er;
 
@@ -85,7 +88,6 @@
                 // Muestra la dirección en la página
                 document.getElementById('walletAddress').textContent = `${walletAddress}`;
                 // AAA
-                getExchangeRate();
                 getBalances(walletAddress);
             } else {
                 // Metamask no está instalado
@@ -122,6 +124,28 @@
         }
 
         // Comprar HostCoin
+        // 0.0001 ether = 1 hostcoin = 0.17~ centims d'euro
+        async function buyOneHostCoin() {
+            try {
+                await window.ethereum.request({method: 'eth_requestAccounts'});
+
+                const web3 = new Web3(window.ethereum);
+                const accounts = await web3.eth.getAccounts();
+                const userAccount = accounts[0];
+                const tokenExchangeContract = new web3.eth.Contract(contractAbi, contractAddress);
+
+                await tokenExchangeContract.methods.buyTokens(1).send({
+                    from: userAccount,
+                    value: web3.utils.toWei('0.0001', 'ether')
+                });
+
+                console.log('Compra exitosa de 1 HostCoin');
+                getBalances();
+            } catch (error) {
+                console.error('Error al comprar HostCoin:', error);
+            }
+        }
+
         function buyHostCoins() {
             console.log("Funcio compra HostCoins");
             const amountEth = 0.0000058; //Cantitat de ETH
@@ -151,61 +175,14 @@
 
 
         //TESTING
-        //exchange rate
-        function setER() {
-            const newRate = 172413; // Nuevo valor para la tasa de cambio
 
-            var address = walletAddress
-
-            const web3 = new Web3(window.ethereum);
-            const tokenExchangeContract = new web3.eth.Contract(contractAbi, contractAddress);
-
-            tokenExchangeContract.methods.setExchangeRate(newRate).send({
-                from: address,
-            })
-                .then(() => {
-                    console.log('Tasa de cambio actualizada correctamente.');
-                })
-                .catch(error => {
-                    console.error('Error al actualizar la tasa de cambio:', error);
-                });
-        }
-
-        //Get exchange rate
-        function getExchangeRate() {
-            // Obtén la instancia de Web3
-            const web3 = new Web3(window.ethereum);
-
-            // Crea una instancia del contrato TokenExchange
-            const tokenExchangeContract = new web3.eth.Contract(contractAbi, contractAddress);
-
-            // Obtiene la tasa de cambio del contrato
-            tokenExchangeContract.methods.exchangeRate().call((error, rate) => {
-                if (error) {
-                    console.error(error);
-                } else {
-                    // Convierte el valor de la tasa de cambio a un número
-                    const exchangeRate = Number(rate);
-                     er = exchangeRate;
-                    // Haz algo con el valor de la tasa de cambio
-                    console.log('Tasa de cambio actual:', exchangeRate);
-                }
-            });
-        }
 
         contractAbi = [
-            {
-                "inputs": [],
-                "name": "buyTokens",
-                "outputs": [],
-                "stateMutability": "payable",
-                "type": "function"
-            },
             {
                 "inputs": [
                     {
                         "internalType": "uint256",
-                        "name": "initialRate",
+                        "name": "_tokenPrice",
                         "type": "uint256"
                     }
                 ],
@@ -216,65 +193,7 @@
                 "anonymous": false,
                 "inputs": [
                     {
-                        "indexed": true,
-                        "internalType": "address",
-                        "name": "recipient",
-                        "type": "address"
-                    },
-                    {
                         "indexed": false,
-                        "internalType": "uint256",
-                        "name": "amount",
-                        "type": "uint256"
-                    }
-                ],
-                "name": "ETHWithdrawn",
-                "type": "event"
-            },
-            {
-                "anonymous": false,
-                "inputs": [
-                    {
-                        "indexed": false,
-                        "internalType": "uint256",
-                        "name": "newRate",
-                        "type": "uint256"
-                    }
-                ],
-                "name": "ExchangeRateUpdated",
-                "type": "event"
-            },
-            {
-                "inputs": [
-                    {
-                        "internalType": "uint256",
-                        "name": "newRate",
-                        "type": "uint256"
-                    }
-                ],
-                "name": "setExchangeRate",
-                "outputs": [],
-                "stateMutability": "nonpayable",
-                "type": "function"
-            },
-            {
-                "inputs": [
-                    {
-                        "internalType": "uint256",
-                        "name": "amount",
-                        "type": "uint256"
-                    }
-                ],
-                "name": "spendTokens",
-                "outputs": [],
-                "stateMutability": "nonpayable",
-                "type": "function"
-            },
-            {
-                "anonymous": false,
-                "inputs": [
-                    {
-                        "indexed": true,
                         "internalType": "address",
                         "name": "buyer",
                         "type": "address"
@@ -283,12 +202,6 @@
                         "indexed": false,
                         "internalType": "uint256",
                         "name": "amount",
-                        "type": "uint256"
-                    },
-                    {
-                        "indexed": false,
-                        "internalType": "uint256",
-                        "name": "cost",
                         "type": "uint256"
                     }
                 ],
@@ -299,7 +212,7 @@
                 "anonymous": false,
                 "inputs": [
                     {
-                        "indexed": true,
+                        "indexed": false,
                         "internalType": "address",
                         "name": "spender",
                         "type": "address"
@@ -313,19 +226,6 @@
                 ],
                 "name": "TokensSpent",
                 "type": "event"
-            },
-            {
-                "inputs": [
-                    {
-                        "internalType": "uint256",
-                        "name": "amount",
-                        "type": "uint256"
-                    }
-                ],
-                "name": "withdrawETH",
-                "outputs": [],
-                "stateMutability": "nonpayable",
-                "type": "function"
             },
             {
                 "inputs": [
@@ -347,16 +247,16 @@
                 "type": "function"
             },
             {
-                "inputs": [],
-                "name": "exchangeRate",
-                "outputs": [
+                "inputs": [
                     {
                         "internalType": "uint256",
-                        "name": "",
+                        "name": "_amount",
                         "type": "uint256"
                     }
                 ],
-                "stateMutability": "view",
+                "name": "buyTokens",
+                "outputs": [],
+                "stateMutability": "payable",
                 "type": "function"
             },
             {
@@ -371,6 +271,43 @@
                 ],
                 "stateMutability": "view",
                 "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "_amount",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "spendTokens",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "tokenPrice",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "withdrawFunds",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "stateMutability": "payable",
+                "type": "receive"
             }
         ]
     </script>
