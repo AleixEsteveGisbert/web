@@ -127,3 +127,5 @@ MEDIA_ROOT = 'media/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ASGI_APPLICATION = "web.routing.application"
+
+LOGOUT_REDIRECT_URL = '/'
