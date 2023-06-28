@@ -97,11 +97,14 @@
                 <div class="tab-pane fade" id="v-pills-config" role="tabpanel" aria-labelledby="v-pills-config-tab"
                      tabindex="0">
                     <div>
-
+                        {% if server.status == "Running" %}
                         <form method="POST">{% csrf_token %}
                             {{ form.as_p }}
                             <button class="btn btn-primary" type="submit">Guardar els canvis</button>
                         </form>
+                        {% else %}
+                        <h5>Inicia el servidor per a fer canvis en la configuració</h5>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="tab-pane fade" id="v-pills-ftp" role="tabpanel" aria-labelledby="v-pills-ftp-tab"

@@ -158,11 +158,11 @@ def details_server(request, server_id):
                 updateFile(server_properties, '/data/server.properties', container)
                 return redirect('server-edit', server.id)
         else:
-            serverproperties = getFile('/data/server.properties', container)
-            form = MinecraftServerPropertiesForm(initial={'server_properties': serverproperties})
-
+            form = MinecraftServerPropertiesForm()
             if container.status == "running:":
                 server.status = "Running"
+                serverproperties = getFile('/data/server.properties', container)
+                form = MinecraftServerPropertiesForm(initial={'server_properties': serverproperties})
             else:
                 server.status = "Stopped"
             details = None
