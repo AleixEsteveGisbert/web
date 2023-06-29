@@ -50,6 +50,7 @@
         <div class="row">
             <div class="balance-box col-12">
                 <button onclick="buyOneHostCoin()">Comprar 1 HostCoin</button>
+                <button onclick="buy100HostCoin()">Comprar 100 HostCoin</button>
             </div>
         </div>
     </div>
@@ -57,9 +58,10 @@
     <div class="container mt-4">
         <div class="row">
             <div class="balance-box col-12">
-                <button onclick="">tumba</button>
-                <button onclick="">lacasa</button>
-                <button onclick="">mami</button>
+                <button onclick="spendHostCoins(1)">Gastar 1 HostCoin</button>
+
+                <button onclick="buyTokens(1)">test 1 token no petasegurissim :)</button>
+
             </div>
         </div>
     </div>
@@ -70,7 +72,7 @@
         //contractAddress = '0x7Bd57f1a0f45Eb5C005C07Ef09820D92a2299de4';
         //contractAddress = '0xd9145CCE52D386f254917e481eB44e9943F39138'; // 4
         //contractAddress = '0xd8b934580fcE35a11B58C6D73aDeE468a2833fa8'; // 5
-        contractAddress = '0x0Ff0705efe9fb8A300047A365f39BEFfA86D7c6f'; // NOSEKIN IA
+        contractAddress = "0x0Ff0705efe9fb8A300047A365f39BEFfA86D7c6f"; // NOSEKIN IA
         var walletAddress;
         var er;
 
@@ -146,35 +148,74 @@
             }
         }
 
-        function buyHostCoins() {
-            console.log("Funcio compra HostCoins");
-            const amountEth = 0.0000058; //Cantitat de ETH
+        async function buy100HostCoin() {
+            try {
+                await window.ethereum.request({method: 'eth_requestAccounts'});
 
-            var address = walletAddress
+                const web3 = new Web3(window.ethereum);
+                const accounts = await web3.eth.getAccounts();
+                const userAccount = accounts[0];
+                const tokenExchangeContract = new web3.eth.Contract(contractAbi, contractAddress);
 
-            const web3 = new Web3(window.ethereum);
-            const tokenExchangeContract = new web3.eth.Contract(contractAbi, contractAddress);
 
-            const amountWei = web3.utils.toBN(web3.utils.toWei(String(amountEth), 'ether'));
+                await tokenExchangeContract.methods.buyTokens(100).send({
+                    from: userAccount,
+                    value: web3.utils.toWei((0.0001 * 100).toString(), 'ether')
+                });
 
-            tokenExchangeContract.methods.buyTokens().send({
-                from: address,
-                value: amountWei.toString()
-            })
-                .on('transactionHash', (hash) => {
-                    console.log('Transacción enviada', hash);
-                })
-                .on('confirmation', (confirmationNumber, receipt) => {
-                    console.log('Confirmación recibida:', confirmationNumber);
-                    getWalletAddress();
-                })
-                .on('error', (error) => {
-                    console.error('Error en la transacción:', error);
-                })
+                console.log('Compra exitosa de 100 HostCoin');
+                getBalances();
+            } catch (error) {
+                console.error('Error al comprar HostCoin:', error);
+            }
+        }
+
+        async function spendHostCoins(amount) {
+            try {
+                // Solicitar permiso al usuario para acceder a su cuenta de Ethereum
+                await window.ethereum.request({method: 'eth_requestAccounts'});
+
+                // Obtener la cuenta del usuario actual
+                const web3 = new Web3(window.ethereum);
+                const tokenExchangeContract = new web3.eth.Contract(contractAbi, contractAddress);
+                const accounts = await web3.eth.getAccounts();
+                const userAccount = accounts[0];
+
+                // Llamar a la función spendTokens del contrato HostCoinSale para gastar los HostCoin
+                await tokenExchangeContract.methods.spendTokens(amount).send({from: userAccount});
+
+                console.log(`Se han gastado ${amount} HostCoin`);
+            } catch (error) {
+                console.error('Error al gastar HostCoin:', error);
+            }
         }
 
 
         //TESTING
+        async function buyTokens(amount) {
+            try {
+                await window.ethereum.request({method: 'eth_requestAccounts'});
+
+                const web3 = new Web3(window.ethereum);
+                const accounts = await web3.eth.getAccounts();
+                const userAccount = accounts[0];
+                const tokenExchangeContract = new web3.eth.Contract(contractAbi, contractAddress);
+
+                const tokenPrice = await tokenExchangeContract.methods.tokenPrice().call();
+                const totalCost = tokenPrice * amount;
+
+                await tokenExchangeContract.methods.buyTokens(amount).send({
+                    from: userAccount,
+                    value: totalCost.toString()
+                });
+
+                console.log('Tokens comprados exitosamente');
+                // Realiza cualquier acción adicional después de comprar los tokens
+
+            } catch (error) {
+                console.error('Error al comprar tokens:', error);
+            }
+        }
 
 
         contractAbi = [
