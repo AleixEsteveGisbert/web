@@ -159,7 +159,7 @@ def details_server(request, server_id):
                 return redirect('server-edit', server.id)
         else:
             form = MinecraftServerPropertiesForm()
-            if container.status == "running:":
+            if container.status == "running":
                 server.status = "Running"
                 serverproperties = getFile('/data/server.properties', container)
                 form = MinecraftServerPropertiesForm(initial={'server_properties': serverproperties})
