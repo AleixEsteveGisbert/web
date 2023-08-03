@@ -29,6 +29,9 @@ class Game(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 
+    def __str__(self):
+        return self.name
+
 
 class Server(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)

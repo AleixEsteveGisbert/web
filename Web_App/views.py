@@ -73,7 +73,6 @@ def new_server(request):
         if form.is_valid():
             server = form.save(commit=False)
             server.user = request.user
-            server.game_id = request.POST.get('game')
             memory_limit = '1G'
 
             try:

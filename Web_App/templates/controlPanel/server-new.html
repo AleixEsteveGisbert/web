@@ -1,22 +1,53 @@
 {% extends 'controlPanel/template.html' %}
 {% block title %}Nou servidor | Gamesave{% endblock %}
 {% block content %}
-    <div class="container col-sm-4">
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <label for="game">Videojoc:</label>
-            <select required class="form-select required" id="game" name="game">
-                <option value selected>Selecciona un videojoc...</option>
-                {% for game in games %}
-                    <option value="{{ game.id }}">{{ game.name }}</option>
-                {% endfor %}
-            </select>
-            <div class="mt-2">
-                <a role="button" href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Cancelar</a>
-                <button class="btn btn-primary" type="submit">Crear servidor</button>
-            </div>
+    <div class="container col-10 mt-2">
+        <div class="row">
+            <h3>Nou servidor</h3>
+            <hr>
+        </div>
+        <div class="row">
+            <div class="col-5">
+                <form method="post" class="row">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col">
+                            {{ form.name.errors }}
+                            {{ form.name.label_tag }}
+                            {{ form.name }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            {{ form.cores.errors }}
+                            {{ form.cores.label_tag }}
+                            {{ form.cores }}
+                        </div>
+                        <div class="col">
+                            {{ form.ram.errors }}
+                            {{ form.ram.label_tag }}
+                            {{ form.ram }}
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col">
+                            {{ form.game.errors }}
+                            {{ form.game.label_tag }}
+                            {{ form.game }}
+                        </div>
+                    </div>
 
-        </form>
+
+                    <div class="mt-2">
+                        <a role="button" href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Cancelar</a>
+                        <button class="btn btn-primary" type="submit">Crear servidor</button>
+                    </div>
+
+                </form>
+            </div>
+            <div class="col-4">
+                Te costara 20€urillos
+            </div>
+        </div>
     </div>
 {% endblock %}
