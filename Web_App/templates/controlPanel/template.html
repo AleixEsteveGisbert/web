@@ -9,11 +9,44 @@
     <link rel="icon" type="image/x-icon" href="{% static 'logo/logo_160x160_color.png' %}"/>
     <!-- Font Awesome icons (free version)-->
     <script src="https://use.fontawesome.com/releases/v6.4.0/js/all.js" crossorigin="anonymous"></script>
+    <!-- Web3 -->
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.3/dist/web3.min.js"></script>
     <!-- Google fonts-->
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css"/>
     <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700" rel="stylesheet" type="text/css"/>
     <!-- Core theme CSS (includes Bootstrap)-->
     <link href="{% static 'css/styles.css' %}" rel="stylesheet"/>
+    <style>
+        .balance-element {
+            display: flex;
+            align-items: center;
+            padding: 5px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+
+        .balance-number {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .balance-button {
+            background-color: #8eb336; /* Color verde del botón */
+            border: none;
+            color: white;
+            font-size: 16px;
+            padding: 2px 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        /* Estilos para el icono de FontAwesome */
+        .balance-button i {
+            margin-right: 5px;
+        }
+
+    </style>
 </head>
 <body>
 <!-- Navbar -->
@@ -25,7 +58,7 @@
     <!-- Container wrapper -->
     <div class="container">
         <!-- Navbar brand -->
-        <a class="navbar-brand me-2" >
+        <a class="navbar-brand me-2">
             Benvingut <b>{{ user.username }}</b>
         </a>
 
@@ -38,29 +71,236 @@
                 </li>
             </ul>
             <div class="d-flex align-items-center">
-                    <div class="dropdown text-end">
-                        <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" id="dropdownUser1"
-                           data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="{{ MEDIA_URL }}/{{ user.userinfo.avatar }}" alt="avatar_img" width="32"
-                                 height="32" class="rounded-circle shadow-4-strong">
-                        </a>
-                        <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1" style="">
-                            <li><a class="dropdown-item" href="/user/{{ user.id }}">El meu perfil</a></li>
-                            <li><a class="dropdown-item" href="/wallet">La meva cartera</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="{% url 'logout' %}">Tanca la sessió</a></li>
-                        </ul>
-                    </div>
-            <!-- Left links -->
+                <!-- hostcoin display -->
+                <div class="balance-element me-3">
+                    <span class="balance-number" id="HOCbalance"> ! </span>
+                    <a role="button" class="button balance-button" href="/wallet">
+                        <i class="fas fa-plus"></i>
+                    </a>
+                </div>
+
+                <div class="dropdown text-end">
+                    <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" id="dropdownUser1"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="{{ MEDIA_URL }}/{{ user.userinfo.avatar }}" alt="avatar_img" width="32"
+                             height="32" class="rounded-circle shadow-4-strong">
+                    </a>
+                    <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1" style="">
+                        <li><a class="dropdown-item" href="/user/{{ user.id }}">El meu perfil</a></li>
+                        <li><a class="dropdown-item" href="/wallet">La meva cartera</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="{% url 'logout' %}">Tanca la sessió</a></li>
+                    </ul>
+                </div>
+                <!-- Left links -->
+            </div>
+            <!-- Collapsible wrapper -->
         </div>
-        <!-- Collapsible wrapper -->
-    </div>
-    <!-- Container wrapper -->
+        <!-- Container wrapper -->
 </nav>
 <!-- Navbar -->
 {% block content %}{% endblock %}
+
+<script>
+    //contractAddress = '0x9bd113f79D9bCdc27E06bDc5a08A27c274512Ee8'; // SmartContract TokenExchange1
+    //contractAddress = '0x7Bd57f1a0f45Eb5C005C07Ef09820D92a2299de4';
+    //contractAddress = '0xd9145CCE52D386f254917e481eB44e9943F39138'; // 4
+    //contractAddress = '0xd8b934580fcE35a11B58C6D73aDeE468a2833fa8'; // 5
+    contractAddress = "0x0Ff0705efe9fb8A300047A365f39BEFfA86D7c6f"; // NOSEKIN IA
+    var walletAddress;
+    var er;
+
+    //Actualitza tots els valors
+    async function getWalletAddress() {
+        // Comprueba si Metamask está instalado
+        if (typeof window.ethereum !== 'undefined') {
+            // Solicita al usuario el acceso a su cartera
+            await window.ethereum.request({method: 'eth_requestAccounts'});
+            // Obtiene la instancia de web3
+            const web3 = new Web3(window.ethereum);
+            // Obtiene la dirección de la cartera actual
+            const accounts = await web3.eth.getAccounts();
+            walletAddress = accounts[0];
+            // Muestra la dirección en la página
+            // document.getElementById('walletAddress').textContent = `${walletAddress}`;
+            // AAA
+            getBalances(walletAddress);
+        } else {
+            // Metamask no está instalado
+            alert('Por favor, instala Metamask para utilizar esta función.');
+        }
+    }
+
+    //Agafa el valor the ETH i HostCoins, es crida des de getWalletAdress()
+    function getBalances(walletAddress) {
+        console.log("Funcio getBalances")
+
+        const web3 = new Web3(window.ethereum);
+        const tokenExchangeContract = new web3.eth.Contract(contractAbi, contractAddress);
+
+        tokenExchangeContract.methods.balances(walletAddress).call((error, balance) => {
+            if (error) {
+                console.error(error);
+            } else {
+                console.log(`El saldo de HostCoin en la cartera ${walletAddress} es: ${balance}`);
+                document.getElementById('HOCbalance').textContent = `${balance} HOC`;
+            }
+        });
+        /*
+        web3.eth.getBalance(walletAddress)
+            .then(balance => {
+                const ethBalance = web3.utils.fromWei(balance, 'ether');
+                console.log(`El saldo de Ethereum en la cartera ${walletAddress} es: ${ethBalance} ETH`);
+                document.getElementById('ETHbalance').textContent = `${ethBalance} ETH`;
+            })
+            .catch(error => {
+                console.error(error);
+            });
+         */
+
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        getWalletAddress(); // Llama a la función cuando la página esté cargada
+    });
+
+
+    contractAbi = [
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "_tokenPrice",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "nonpayable",
+            "type": "constructor"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": false,
+                    "internalType": "address",
+                    "name": "buyer",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "amount",
+                    "type": "uint256"
+                }
+            ],
+            "name": "TokensPurchased",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": false,
+                    "internalType": "address",
+                    "name": "spender",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "amount",
+                    "type": "uint256"
+                }
+            ],
+            "name": "TokensSpent",
+            "type": "event"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "name": "balances",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "_amount",
+                    "type": "uint256"
+                }
+            ],
+            "name": "buyTokens",
+            "outputs": [],
+            "stateMutability": "payable",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "owner",
+            "outputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "_amount",
+                    "type": "uint256"
+                }
+            ],
+            "name": "spendTokens",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "tokenPrice",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "withdrawFunds",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "stateMutability": "payable",
+            "type": "receive"
+        }
+    ]
+</script>
 
 </body>
 <!-- Bootstrap core JS-->
