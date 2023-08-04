@@ -10,23 +10,22 @@ var er;
 async function getWalletAddress() {
     // Comprueba si Metamask está instalado
     if (typeof window.ethereum !== 'undefined') {
-        // Solicita al usuario el acceso a su cartera
+        // Sol·licita al usuario l'acceso a la seva cartera
         await window.ethereum.request({method: 'eth_requestAccounts'});
-        // Obtiene la instancia de web3
+        // Obté la instància de web3
         const web3 = new Web3(window.ethereum);
-        // Obtiene la dirección de la cartera actual
+        // Obté la direcció de la cartera actual
         const accounts = await web3.eth.getAccounts();
         walletAddress = accounts[0];
-        // Muestra la dirección en la página
+        // Mostra la direcció en la pàgina
         if(document.getElementById('walletAddress') != null) {
             document.getElementById('walletAddress').textContent = `${walletAddress}`;
         }
 
-        // AAA
         getBalances(walletAddress);
     } else {
-        // Metamask no está instalado
-        alert('Por favor, instala Metamask para utilizar esta función.');
+        // Metamask no està instal·lat
+        alert('Per favor, instal·la Metamask per utilizar aquesta funció.');
     }
 }
 
@@ -41,7 +40,7 @@ function getBalances(walletAddress) {
         if (error) {
             console.error(error);
         } else {
-            console.log(`El saldo de HostCoin en la cartera ${walletAddress} es: ${balance}`);
+            console.log(`El saldo de HostCoin a la cartera ${walletAddress} es: ${balance}`);
             document.getElementById('HOCbalance').textContent = `${balance} HOC`;
             if (document.getElementById('HOCbalanceW') != null) {
                 document.getElementById('HOCbalanceW').textContent = `${balance} HOC`;
@@ -52,7 +51,7 @@ function getBalances(walletAddress) {
     web3.eth.getBalance(walletAddress)
         .then(balance => {
             const ethBalance = web3.utils.fromWei(balance, 'ether');
-            console.log(`El saldo de Ethereum en la cartera ${walletAddress} es: ${ethBalance} ETH`);
+            console.log(`El saldo de Ethereum a la cartera ${walletAddress} es: ${ethBalance} ETH`);
             if (document.getElementById('ETHbalance') != null) {
                 document.getElementById('ETHbalance').textContent = `${ethBalance} ETH`;
             }
@@ -83,8 +82,9 @@ async function buyTokens(amount) {
             value: totalCost.toString()
         });
 
-        console.log('Tokens comprados exitosamente');
-        // Realiza cualquier acción adicional después de comprar los tokens
+        //Això s'executa quan s'ha completat la transacció
+        console.log('Tokens comprats exitosament');
+        // accions adicionals
 
     } catch (error) {
         console.error('Error al comprar tokens:', error);
@@ -93,26 +93,26 @@ async function buyTokens(amount) {
 
 async function spendHostCoins(amount) {
     try {
-        // Solicitar permiso al usuario para acceder a su cuenta de Ethereum
+        // Solicitar permis al usuario per a accedir al seu compte de Ethereum
         await window.ethereum.request({method: 'eth_requestAccounts'});
 
-        // Obtener la cuenta del usuario actual
+        // Obtenir el compte de l'usuari actual
         const web3 = new Web3(window.ethereum);
         const tokenExchangeContract = new web3.eth.Contract(contractAbi, contractAddress);
         const accounts = await web3.eth.getAccounts();
         const userAccount = accounts[0];
 
-        // Llamar a la función spendTokens del contrato HostCoinSale para gastar los HostCoin
+        // Cridar a la funció spendTokens del contracte HostCoinSale per gastar HostCoin
         await tokenExchangeContract.methods.spendTokens(amount).send({from: userAccount});
 
-        console.log(`Se han gastado ${amount} HostCoin`);
+        console.log(`S'han gastat ${amount} HostCoin`);
     } catch (error) {
         console.error('Error al gastar HostCoin:', error);
     }
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    getWalletAddress(); // Llama a la función cuando la página esté cargada
+    getWalletAddress(); // Cridar a la funció quan la pàgina carrega al complet
 });
 
 
