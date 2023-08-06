@@ -4,7 +4,6 @@
 //contractAddress = '0xd8b934580fcE35a11B58C6D73aDeE468a2833fa8'; // 5
 contractAddress = "0x0Ff0705efe9fb8A300047A365f39BEFfA86D7c6f"; // NOSEKIN IA
 var walletAddress;
-var er;
 
 //Actualitza tots els valors
 async function getWalletAddress() {
@@ -18,7 +17,7 @@ async function getWalletAddress() {
         const accounts = await web3.eth.getAccounts();
         walletAddress = accounts[0];
         // Mostra la direcció en la pàgina
-        if(document.getElementById('walletAddress') != null) {
+        if (document.getElementById('walletAddress') != null) {
             document.getElementById('walletAddress').textContent = `${walletAddress}`;
         }
 
@@ -31,7 +30,8 @@ async function getWalletAddress() {
 
 //Agafa el valor the ETH i HostCoins, es crida des de getWalletAdress()
 function getBalances(walletAddress) {
-    console.log("Funcio getBalances")
+    console.log("Funcio getBalances");
+    console.log(window.location.pathname);
 
     const web3 = new Web3(window.ethereum);
     const tokenExchangeContract = new web3.eth.Contract(contractAbi, contractAddress);
@@ -41,9 +41,16 @@ function getBalances(walletAddress) {
             console.error(error);
         } else {
             console.log(`El saldo de HostCoin a la cartera ${walletAddress} es: ${balance}`);
+            // HOC top bar
             document.getElementById('HOCbalance').textContent = `${balance} HOC`;
+            // HOC wallet
             if (document.getElementById('HOCbalanceW') != null) {
                 document.getElementById('HOCbalanceW').textContent = `${balance} HOC`;
+            }
+            // HOC new server
+
+            if (document.getElementById('HOCbalanceNS') != null) {
+                document.getElementById('HOCbalanceNS').textContent = "El balanç d'aquesta cartera és de: " + `${balance} HOC`;
             }
         }
     });
@@ -115,6 +122,31 @@ document.addEventListener("DOMContentLoaded", function () {
     getWalletAddress(); // Cridar a la funció quan la pàgina carrega al complet
 });
 
+//test
+$(document).ready(function () {
+    if (window.location.pathname == "/server/new") {
+        console.log("New server");
+        calcularPreu();
+        alert("total = " + walletHOC);
+    }
+
+    //Calcular preu
+    function calcularPreu() {
+        const cores = parseInt($('#id_cores').val());
+        const ram = parseInt($('#id_ram').val());
+        let hocCoresPrice = cores * 1;
+        let hocRamPrice = ram * 1;
+        let total = hocCoresPrice + hocRamPrice;
+        document.getElementById('HOCprice').textContent = "El preu diari d'aquest servidor serà de: " + total + " HOC";
+
+        alert("cores = " + hocCoresPrice + " | ram = " + hocRamPrice + " | Total en HOC: " + total + " | Total: ");
+    }
+
+    $('#id_cores, #id_ram').change(function () {
+        calcularPreu();
+    })
+
+})
 
 contractAbi = [
     {
