@@ -48,7 +48,7 @@ function getBalances(walletAddress) {
                 document.getElementById('HOCbalanceW').textContent = `${balance} HOC`;
             }
             // HOC new server
-
+            alert(balance);
             if (document.getElementById('HOCbalanceNS') != null) {
                 document.getElementById('HOCbalanceNS').textContent = "El balanç d'aquesta cartera és de: " + `${balance} HOC`;
             }
@@ -113,6 +113,7 @@ async function spendHostCoins(amount) {
         await tokenExchangeContract.methods.spendTokens(amount).send({from: userAccount});
 
         console.log(`S'han gastat ${amount} HostCoin`);
+
     } catch (error) {
         console.error('Error al gastar HostCoin:', error);
     }
@@ -122,12 +123,12 @@ document.addEventListener("DOMContentLoaded", function () {
     getWalletAddress(); // Cridar a la funció quan la pàgina carrega al complet
 });
 
-//test
+//New server
 $(document).ready(function () {
     if (window.location.pathname == "/server/new") {
         console.log("New server");
         calcularPreu();
-        alert("total = " + walletHOC);
+        //alert("total = " + walletHOC);
     }
 
     //Calcular preu
