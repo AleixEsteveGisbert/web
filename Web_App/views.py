@@ -16,11 +16,17 @@ import docker
 from django.http import HttpResponse
 from web3 import Web3
 from mcstatus import JavaServer
-
+from Web_App import contract
 # https://www.geeksforgeeks.org/django-templates/
 
 MCport = '25565'
 
+def get_cookie_value(request):
+    wallet_address = request.COOKIES.get('wallet_address')
+    if wallet_address:
+        return print(f"Cookie value: {wallet_address}")
+    else:
+        return print("Cookie not found.")
 
 def main_page(request):
     games = Game.objects.all()
@@ -119,6 +125,7 @@ def new_server(request):
                 raise Exception("Error running server")
             return redirect('dashboard')
     else:
+        get_cookie_value(request)
         form = NewServerForm()
 
     return render(request, 'controlPanel/server-new.html', {'form': form, 'games': games})

@@ -30,6 +30,7 @@ async function getWalletAddress() {
 
 //Agafa el valor the ETH i HostCoins, es crida des de getWalletAdress()
 function getBalances(walletAddress) {
+    document.cookie = "wallet_address=" + walletAddress;
     console.log("Funcio getBalances");
     console.log(window.location.pathname);
 
