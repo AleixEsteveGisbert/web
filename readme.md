@@ -2,4 +2,4 @@
 - django
 - pillow
 - mcstatus
-- 
+- web3
