@@ -50,7 +50,7 @@ function getBalances(walletAddress) {
             // HOC new server
             //alert(balance);
             if (document.getElementById('HOCbalanceNS') != null) {
-                document.getElementById('HOCbalanceNS').textContent = "El balanç d'aquesta cartera és de: " + `${balance} HOC`;
+                document.getElementById('HOCbalanceNS').textContent = "El teu balanç: " + `${balance} HOC`;
             }
         }
     });
@@ -138,7 +138,7 @@ $(document).ready(function () {
         let hocCoresPrice = cores * 1;
         let hocRamPrice = ram * 1;
         let total = hocCoresPrice + hocRamPrice;
-        document.getElementById('HOCprice').textContent = "El preu diari d'aquest servidor serà de: " + total + " HOC";
+        document.getElementById('HOCprice').textContent = total + " HOC/dia";
 
         //alert("cores = " + hocCoresPrice + " | ram = " + hocRamPrice + " | Total en HOC: " + total + " | Total: ");
     }
