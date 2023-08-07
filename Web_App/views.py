@@ -310,7 +310,7 @@ def delete_server(request, server_id):
         container = client.containers.get(str(server.id))
         try:
             container.stop()
-            container.remove(True)
+            container.remove(v=True, force=True)
         except DockerException as e:
             print("[Error] delete_server: " + e.__str__())
             return HttpResponse(status=500)
