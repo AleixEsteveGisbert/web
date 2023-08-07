@@ -22,9 +22,9 @@
             </div>
             <hr>
             <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                <button class="nav-link active" id="v-pills-home-tab" data-bs-toggle="pill"
-                        data-bs-target="#v-pills-home" type="button" role="tab" aria-controls="v-pills-home"
-                        aria-selected="true"><i class="fa-solid fa-house"></i>Home
+                <button class="nav-link active" id="v-pills-info-tab" data-bs-toggle="pill"
+                        data-bs-target="#v-pills-info" type="button" role="tab" aria-controls="v-pills-info"
+                        aria-selected="true"><i class="fa-solid fa-circle-info"></i>Info
                 </button>
                 <button class="nav-link" id="v-pills-console-tab" data-bs-toggle="pill"
                         data-bs-target="#v-pills-console" type="button" role="tab" aria-controls="v-pills-console"
@@ -84,39 +84,68 @@
                 </div>
             </div>
             <div class="tab-content" id="v-pills-tabContent">
-                <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel"
-                     aria-labelledby="v-pills-home-tab" tabindex="0">
+                <div class="tab-pane fade show active" id="v-pills-info" role="tabpanel"
+                     aria-labelledby="v-pills-info-tab" tabindex="0">
                     <div class="container mt-5">
                         <div class="row align-items-center">
                             <div class="col-2">
                                 <i class="fa-solid fa-microchip fa-5x"></i>
                             </div>
                             <div class="col-sm">
-                                <b>{{ server.ram }}</b>
+                                <h3>{{ server.ram|floatformat }}</h3>
                             </div>
                             <div class="col-2">
                                 <i class="fa-solid fa-memory fa-5x"></i>
                             </div>
                             <div class="col-sm">
-                                <b>{{ server.cores }}</b>
+                                <h3>{{ server.cores|floatformat }}</h3>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="tab-pane fade" id="v-pills-console" role="tabpanel" aria-labelledby="v-pills-console-tab"
                      tabindex="0">
+                    <div class="col-9">
+                        <div class="row mt-2 bg-dark text-light" data-height="10">
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>|
+                            <br>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col">
+                                <input class="form-control" type="text" name="command" placeholder="/">
+                            </div>
+                            <div class="col-2">
+                                <input class="form-control btn btn-primary" type="button" value="Enviar">
+                            </div>
+
+                        </div>
+                    </div>
 
                 </div>
                 <div class="tab-pane fade" id="v-pills-config" role="tabpanel" aria-labelledby="v-pills-config-tab"
                      tabindex="0">
                     <div>
                         {% if server.status == "Running" %}
-                        <form method="POST">{% csrf_token %}
-                            {{ form.as_p }}
-                            <button class="btn btn-primary" type="submit">Guardar els canvis</button>
-                        </form>
+                            <form method="POST">{% csrf_token %}
+                                {{ form.as_p }}
+                                <button class="btn btn-primary" type="submit">Guardar els canvis</button>
+                            </form>
                         {% else %}
-                        <h5>Inicia el servidor per a fer canvis en la configuració</h5>
+                            <h5>Inicia el servidor per a fer canvis en la configuració</h5>
                         {% endif %}
                     </div>
                 </div>

@@ -55,6 +55,6 @@ class NewServerForm(forms.ModelForm):
 
 
 class MinecraftServerPropertiesForm(forms.Form):
-    server_properties = forms.CharField(label='server.properties', widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '25'}))
+    server_properties = forms.CharField(label='server.properties', widget=forms.Textarea(attrs={'class': 'form-control bg-dark text-light', 'rows': '25'}))
 
 
