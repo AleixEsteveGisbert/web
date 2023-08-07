@@ -1,14 +1,10 @@
 from web3 import Web3
 
-from web3 import Web3
-
 alchemy_url = "https://eth-sepolia.g.alchemy.com/v2/5APA3WpSw2ESkV84Qlcy-4ZgFQW9I9_M"
 w3 = Web3(Web3.HTTPProvider(alchemy_url))
 
-# Dirección de tu contrato inteligente
 contract_address = "0x0Ff0705efe9fb8A300047A365f39BEFfA86D7c6f"
 
-# ABI (Interfaz de Contrato ABI) del contrato inteligente
 contract_abi = contractAbi = [
     {
         "inputs": [
@@ -143,16 +139,13 @@ contract_abi = contractAbi = [
     }
 ]
 
-
-def get_wallet_address():
-    if hasattr(Web3, 'ethereum') and Web3.ethereum.is_connected():
-        try:
-            accounts = Web3.ethereum.request("eth_requestAccounts")
-            if accounts:
-                wallet_address = accounts[0]
-                return wallet_address
-        except Exception as e:
-            print(f"Error: {e}")
+def get_wallet_address(request):
+    try:
+        wallet_address = request.COOKIES.get('wallet_address')
+        if wallet_address:
+            return wallet_address
+    except Exception as e:
+        print(f"[Error] get_wallet_address: {e}")
     return None
 
 def interact_with_contract():
@@ -169,16 +162,17 @@ def interact_with_contract():
         print(f"Error: {e}")
         return None
 
-# Llamada a la función para interactuar con el contrato
-contract_result = interact_with_contract()
-if contract_result is not None:
-    print(f"Contract Result: {contract_result}")
-
-
-alchemy_url = "https://eth-sepolia.g.alchemy.com/v2/5APA3WpSw2ESkV84Qlcy-4ZgFQW9I9_M"
-w3 = Web3(Web3.HTTPProvider(alchemy_url))
-
-print(w3.is_connected())
+def spend_host_coins(request, amount):
+    # Crea una instancia del contrato
+    contract = w3.eth.contract(address=contract_address, abi=contract_abi)
+    try:
+        user_account = get_wallet_address(request)
+        result = contract.functions.spendTokens(amount).transact({'from': user_account})
+        print(f"S'han gastat {amount} HostCoins")
+        return result
+    except Exception as e:
+        print(f"[Error] spend_host_coins: {e}")
+        return None
 
 #balance = w3.eth.get_balance('0x1c7D08bc2360265296A76b241478AF10ecFb7Fe7')
 #print(balance)

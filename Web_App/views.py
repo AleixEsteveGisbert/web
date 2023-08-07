@@ -21,12 +21,6 @@ from Web_App import contract
 
 MCport = '25565'
 
-def get_cookie_value(request):
-    wallet_address = request.COOKIES.get('wallet_address')
-    if wallet_address:
-        return print(f"Cookie value: {wallet_address}")
-    else:
-        return print("Cookie not found.")
 
 def main_page(request):
     games = Game.objects.all()
@@ -123,11 +117,11 @@ def new_server(request):
                 server.delete()
                 print("[Error] new_server: " + e.__str__())
                 raise Exception("Error running server")
+
             return redirect('dashboard')
     else:
-        get_cookie_value(request)
         form = NewServerForm()
-
+        contract.spend_host_coins(request, 1)
     return render(request, 'controlPanel/server-new.html', {'form': form, 'games': games})
 
 
