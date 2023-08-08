@@ -125,6 +125,18 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 //New server
+function calcularPreu() {
+    const cores = parseInt($('#id_cores').val());
+    const ram = parseInt($('#id_ram').val());
+    let hocCoresPrice = cores * 1;
+    let hocRamPrice = ram * 1;
+    let total = hocCoresPrice + hocRamPrice;
+    document.getElementById('HOCprice').textContent = total + " HOC/dia";
+
+    return total;
+    //alert("cores = " + hocCoresPrice + " | ram = " + hocRamPrice + " | Total en HOC: " + total + " | Total: ");
+}
+
 $(document).ready(function () {
     if (window.location.pathname == "/server/new") {
         console.log("New server");
@@ -132,24 +144,41 @@ $(document).ready(function () {
         //alert("total = " + walletHOC);
     }
 
-    //Calcular preu
-    function calcularPreu() {
-        const cores = parseInt($('#id_cores').val());
-        const ram = parseInt($('#id_ram').val());
-        let hocCoresPrice = cores * 1;
-        let hocRamPrice = ram * 1;
-        let total = hocCoresPrice + hocRamPrice;
-        document.getElementById('HOCprice').textContent = total + " HOC/dia";
-
-        //alert("cores = " + hocCoresPrice + " | ram = " + hocRamPrice + " | Total en HOC: " + total + " | Total: ");
-    }
-
     $('#id_cores, #id_ram').change(function () {
         calcularPreu();
     })
-
 })
 
+function checkFields() {
+    let x = false;
+    let y = false;
+
+    if ($('#id_name').val().length === 0) {
+        $('#id_name').addClass('is-invalid');
+    } else {
+        $('#id_name').removeClass('is-invalid');
+        x = true;
+    }
+
+    if (!$('#id_game').val()) {
+        $('#id_game').addClass('is-invalid');
+    } else {
+        $('#id_game').removeClass('is-invalid');
+        y = true;
+    }
+
+    if (x & y) {
+        payment();
+    }
+}
+
+function payment() {
+    let total = calcularPreu();
+    alert(total);
+    //spendHostCoins(calcularPreu());
+    document.serverCreation.submit();
+
+}
 
 
 function addDays() {

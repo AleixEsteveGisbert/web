@@ -7,8 +7,8 @@
             <hr>
         </div>
         <div class="row">
-            <div class="col-5">
-                <form method="post" class="row">
+            <div class="col-6">
+                <form name="serverCreation" method="post" class="row">
                     {% csrf_token %}
                     <div class="row">
                         <div class="col">
@@ -37,18 +37,21 @@
                         </div>
                     </div>
 
-
                     <div class="mt-2">
                         <a role="button" href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Cancelar</a>
-                        <button class="btn btn-primary" type="submit">Crear servidor</button>
+
                     </div>
-<button class="btn btn-primary" onclick="addDays()">PROBA</button>
+
                 </form>
+                <button class="btn btn-primary" onclick="checkFields()">Crear servidor</button>
             </div>
-            <div class="col-4 bg-light rounded p-3">
+            <div class="col-6 bg-light rounded p-3">
                 <h4 id="HOCprice"></h4>
                 <br>
                 <h4 id="HOCbalanceNS"></h4>
+            </div>
+            <div class="col-12 bg-light rounded mt-5">
+                <p>Aquest procés pot trigar uns quants minuts. Un moment ...</p>
             </div>
         </div>
     </div>
