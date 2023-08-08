@@ -41,6 +41,9 @@ urlpatterns = [
     path('server/<int:server_id>/restart', views.restart_server, name='server-restart'),
     path('server/<int:server_id>/delete', views.delete_server, name='server-delete'),
     path('server/<int:server_id>/details', views.details_server, name='server-edit'),
+    path('server/<int:server_id>/adddays', views.adddays, name='server-adddays'),
+
+    path('server/<int:server_id>/setexpirationdate', views.set_expiration_date, name='server-set-expiration-date'),
 
     # Wallet URLs
     path('wallet', views.wallet, name='wallet'),

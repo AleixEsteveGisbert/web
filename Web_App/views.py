@@ -1,3 +1,4 @@
+import datetime
 import sys
 from time import sleep
 
@@ -6,17 +7,19 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 from docker.errors import DockerException
 from docker.models.networks import Network
 
-from Web_App.forms import LoginForm, RegisterForm, NewServerForm, MinecraftServerPropertiesForm
+from Web_App.forms import LoginForm, RegisterForm, NewServerForm, MinecraftServerPropertiesForm, addDaysForm
 from Web_App.models import Game, Server
 import docker
 
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpRequest
 from web3 import Web3
 from mcstatus import JavaServer
 from Web_App import contract
+
 # https://www.geeksforgeeks.org/django-templates/
 
 MCport = '25565'
@@ -331,3 +334,39 @@ def wallet(request):
         'balance': balance,
     }
     return render(request, 'controlPanel/wallet.html', context)
+
+
+@login_required(login_url='login')
+def adddays(request, server_id):
+    server = get_object_or_404(Server, id=server_id)
+
+    if request.method == 'POST':
+        form = addDaysForm(request.POST)
+    else:
+        form = addDaysForm()
+
+    context = {
+        'server': server,
+        'form': form,
+    }
+    return render(request, 'controlPanel/server-add-days.html', context)
+
+
+@login_required(login_url='login')
+@csrf_exempt
+def set_expiration_date(request, server_id):
+    if request.method == 'POST':
+        server = get_object_or_404(Server, id=server_id)
+        if request.user.id is server.user.id:
+            print('1')
+            if not server.expiration_date:
+                print('2')
+                server.expiration_date = datetime.datetime.now() + datetime.timedelta(days=1)
+            else:
+                server.expiration_date = server.expiration_date + datetime.timedelta(days=1)
+            server.save()
+        else:
+            return HttpResponse(status=403)
+    else:
+        return HttpResponse(status=400)
+    return HttpResponse(status=200)

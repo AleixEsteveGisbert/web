@@ -57,4 +57,6 @@ class NewServerForm(forms.ModelForm):
 class MinecraftServerPropertiesForm(forms.Form):
     server_properties = forms.CharField(label='server.properties', widget=forms.Textarea(attrs={'class': 'form-control bg-dark text-light', 'rows': '25'}))
 
-
+class addDaysForm(forms.Form):
+    days = forms.ChoiceField(choices=[('1', '1'), ('2', '2'), ('3', '3'), ('4', '4'), ('5', '5'), ('6', '6'), ('7', '7')],
+                            widget=forms.Select(attrs={'class': 'form-select'}))

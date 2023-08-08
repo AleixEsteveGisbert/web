@@ -150,6 +150,36 @@ $(document).ready(function () {
 
 })
 
+
+
+function addDays() {
+    // Datos que deseas enviar en la solicitud POST
+    var requestData = {
+        days: '1',
+    };
+    //var csrfToken = $('#csrf-token').children($("input[name=csrfmiddlewaretoken]")).val()
+
+    //var headers = {'csrfmiddlewaretoken': csrfToken};
+
+    var url = '/server/45/setexpirationdate';
+
+// Realizar la solicitud POST
+    $.ajax({
+        type: 'POST',
+        url: url,
+        data: JSON.stringify(requestData),
+        contentType: 'application/json',
+        //header: headers,
+        success: function (response) {
+            console.log('Solicitud POST exitosa:', response);
+        },
+        error: function (xhr, textStatus, errorThrown) {
+            console.error('Error en la solicitud POST:', textStatus, errorThrown);
+        }
+    });
+}
+
+
 contractAbi = [
     {
         "inputs": [

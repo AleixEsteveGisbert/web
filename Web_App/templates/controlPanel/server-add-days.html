@@ -1,0 +1,28 @@
+{% extends 'controlPanel/template.html' %}
+{% block title %}Ampliar Uptime | Gamesave{% endblock %}
+{% block content %}
+    <div class="container col-10 mt-2">
+        <div class="row">
+            <h3>Ampliar uptime</h3>
+            <hr>
+        </div>
+        <div class="row">
+            <div class="col-5">
+                <form method="post" class="row">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <div class="mt-2">
+                        <a role="button" href="{% url 'server-edit' server.id %}" class="btn btn-outline-secondary">Cancelar</a>
+                        <button class="btn btn-primary" type="submit">Confirmar</button>
+                    </div>
+
+                </form>
+            </div>
+            <div class="col-4 bg-light rounded p-3">
+                <h4 id="HOCprice"></h4>
+                <br>
+                <h4 id="HOCbalanceNS"></h4>
+            </div>
+        </div>
+    </div>
+{% endblock %}
