@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from docker.errors import DockerException
 from docker.models.networks import Network
@@ -339,9 +340,16 @@ def wallet(request):
 @login_required(login_url='login')
 def adddays(request, server_id):
     server = get_object_or_404(Server, id=server_id)
-
     if request.method == 'POST':
         form = addDaysForm(request.POST)
+        if form.is_valid():
+            days = int(form.cleaned_data['days'])
+            if server.expiration_date < timezone.now():
+                server.expiration_date = datetime.datetime.now() + datetime.timedelta(days=days)
+            else:
+                server.expiration_date = server.expiration_date + datetime.timedelta(days=days)
+            server.save()
+            return redirect('server-edit', server.id)
     else:
         form = addDaysForm()
 
