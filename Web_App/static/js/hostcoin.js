@@ -114,6 +114,7 @@ async function spendHostCoins(amount) {
         await tokenExchangeContract.methods.spendTokens(amount).send({from: userAccount});
 
         console.log(`S'han gastat ${amount} HostCoin`);
+        //document.serverCreation.submit();
 
     } catch (error) {
         console.error('Error al gastar HostCoin:', error);
@@ -168,16 +169,15 @@ function checkFields() {
     }
 
     if (x & y) {
+        $("#missatge").css('display', 'block');
         payment();
     }
 }
 
 function payment() {
     let total = calcularPreu();
-    alert(total);
     //spendHostCoins(calcularPreu());
     document.serverCreation.submit();
-
 }
 
 

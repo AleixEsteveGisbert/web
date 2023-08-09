@@ -1,6 +1,11 @@
 {% extends 'controlPanel/template.html' %}
 {% block title %}Nou servidor | Gamesave{% endblock %}
 {% block content %}
+    <style>
+        .text-red {
+            color: red;
+        }
+    </style>
     <div class="container col-10 mt-2">
         <div class="row">
             <h3>Nou servidor</h3>
@@ -50,8 +55,8 @@
                 <br>
                 <h4 id="HOCbalanceNS"></h4>
             </div>
-            <div class="col-12 bg-light rounded mt-5">
-                <p>Aquest procés pot trigar uns quants minuts. Un moment ...</p>
+            <div id="missatge" class="col-12 bg-light rounded mt-5" style="display: none">
+                <p class="text-center text-red">Aquest procés pot trigar uns quants minuts. Un moment ...</p>
             </div>
         </div>
     </div>
