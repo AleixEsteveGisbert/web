@@ -32,7 +32,6 @@ async function getWalletAddress() {
 function getBalances(walletAddress) {
     document.cookie = "wallet_address=" + walletAddress;
     console.log("Funcio getBalances");
-    console.log(window.location.pathname);
 
     const web3 = new Web3(window.ethereum);
     const tokenExchangeContract = new web3.eth.Contract(contractAbi, contractAddress);
@@ -114,7 +113,13 @@ async function spendHostCoins(amount) {
         await tokenExchangeContract.methods.spendTokens(amount).send({from: userAccount});
 
         console.log(`S'han gastat ${amount} HostCoin`);
-        //document.serverCreation.submit();
+
+        if ($('form[name="serverCreation"]').length > 0) {
+            document.serverCreation.submit();
+        } else if ($('form[name="server_add_days"]').length > 0) {
+            document.server_add_days.submit();
+        }
+
 
     } catch (error) {
         console.error('Error al gastar HostCoin:', error);
@@ -124,6 +129,30 @@ async function spendHostCoins(amount) {
 document.addEventListener("DOMContentLoaded", function () {
     getWalletAddress(); // Cridar a la funció quan la pàgina carrega al complet
 });
+
+//Controlar a quina pàgina està l'usuari
+$(document).ready(function () {
+    console.log(window.location.pathname);
+    let x = window.location.pathname;
+    let result = x.substring(x.lastIndexOf("/"));
+    console.log(result);
+    if (result == "/new") {
+        console.log("New server");
+        calcularPreu();
+        //alert("total = " + walletHOC);
+    } else if (result == "/adddays") {
+        console.log("Add days");
+        calcularPreuAD();
+    }
+
+    $('#id_cores, #id_ram').change(function () {
+        calcularPreu();
+    })
+
+    $('#id_days').change(function () {
+        calcularPreuAD();
+    })
+})
 
 //New server
 function calcularPreu() {
@@ -137,18 +166,6 @@ function calcularPreu() {
     return total;
     //alert("cores = " + hocCoresPrice + " | ram = " + hocRamPrice + " | Total en HOC: " + total + " | Total: ");
 }
-
-$(document).ready(function () {
-    if (window.location.pathname == "/server/new") {
-        console.log("New server");
-        calcularPreu();
-        //alert("total = " + walletHOC);
-    }
-
-    $('#id_cores, #id_ram').change(function () {
-        calcularPreu();
-    })
-})
 
 function checkFields() {
     let x = false;
@@ -175,11 +192,28 @@ function checkFields() {
 }
 
 function payment() {
-    let total = calcularPreu();
-    //spendHostCoins(calcularPreu());
-    document.serverCreation.submit();
+    //let total = calcularPreu();
+    spendHostCoins(calcularPreu());
+    //document.serverCreation.submit();
 }
 
+// Add days
+function calcularPreuAD() {
+    const cores = parseInt($("#id_cores").text());
+    const ram = parseInt($("#id_ram").text());
+    let hocCoresPrice = cores * 1;
+    let hocRamPrice = ram * 1;
+    let total = hocCoresPrice + hocRamPrice;
+    document.getElementById('id_total').textContent = total * $('#id_days').val();
+
+    return total;
+    //alert("cores = " + hocCoresPrice + " | ram = " + hocRamPrice + " | Total en HOC: " + total + " | Total: ");
+}
+
+function paymentAD() {
+    $("#missatge").css('display', 'block');
+    spendHostCoins(calcularPreuAD());
+}
 
 function addDays() {
     // Datos que deseas enviar en la solicitud POST
