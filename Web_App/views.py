@@ -116,6 +116,7 @@ def new_server(request):
                 # I ens quedem amb el port TCP
                 server.port = ports[f'{MCport}/tcp'][0]['HostPort']
                 server.status = "Running"
+                server.expiration_date = datetime.datetime.now() + datetime.timedelta(days=1)
                 server.save()
             except DockerException as e:
                 server.delete()
@@ -170,7 +171,7 @@ def details_server(request, server_id):
             else:
                 server.status = "Stopped"
             details = None
-
+            server.save()
             try:
                 details = JavaServer.lookup(server.address + ":" + str(server.port)).status()
             except Exception as e:
