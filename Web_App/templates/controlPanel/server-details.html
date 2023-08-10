@@ -63,7 +63,7 @@
                                             aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
-                                    <p>El servidor ha expirat. Estava pagat fins {{ server.expiration_date|date:'d-m-Y H:i' }}</p>
+                                    <p>El servidor va expirar el dia {{ server.expiration_date|date:'d-m-Y H:i' }}</p>
                                 </div>
                                 <div class="modal-footer">
                                     <a role="button" type="button" href="{% url 'server-adddays' server.id %}" class="btn btn-primary">Ampliar</a>
@@ -148,8 +148,7 @@
                                             class="btn btn-secondary">Ampliar</a>
                                     </h5>
                                 {% else %}
-                                    <h5 class="text-danger">El servidor ha expirat. Estava pagat
-                                        fins {{ server.expiration_date|date:'d-m-Y H:i' }} <a role="button"
+                                    <h5 class="text-danger">El servidor va expirar el dia {{ server.expiration_date|date:'d-m-Y H:i' }} <a role="button"
                                                                                               href="{% url 'server-adddays' server.id %}"
                                                                                               class="btn btn-secondary">Ampliar</a>
                                     </h5>
