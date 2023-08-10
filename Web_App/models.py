@@ -49,6 +49,12 @@ class Server(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 
+    def is_expired(self):
+        if self.expiration_date is None:
+            return False
+        current_time = timezone.now()
+        return self.expiration_date < current_time
+
 
 class ConsoleMessage(models.Model):
     server = models.ForeignKey(Server, on_delete=models.CASCADE)

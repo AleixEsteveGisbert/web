@@ -233,33 +233,36 @@ def update_servers(request):
 def start_server(request, server_id):
     server = get_object_or_404(Server, id=server_id)
     if server.user == request.user:
-        try:
-            client = docker.from_env()
-        except DockerException as e:
-            print("[Error] start_server: Docker is not running")
-            raise Exception("Docker is not running")
-        container = client.containers.get(str(server.id))
-        try:
-            container.start()
-            # Configurem un sleep per a esperar fins que el contenidor estigui funcionant per a poder obtenir el port
-            timeout = 120
-            stop_time = 3
-            elapsed_time = 0
-            while container.status != 'running' and elapsed_time < timeout:
-                sleep(stop_time)
-                elapsed_time += stop_time
-                container.reload()
-                continue
+        if not server.is_expired():
+            try:
+                client = docker.from_env()
+            except DockerException as e:
+                print("[Error] start_server: Docker is not running")
+                raise Exception("Docker is not running")
+            container = client.containers.get(str(server.id))
+            try:
+                container.start()
+                # Configurem un sleep per a esperar fins que el contenidor estigui funcionant per a poder obtenir el port
+                timeout = 120
+                stop_time = 3
+                elapsed_time = 0
+                while container.status != 'running' and elapsed_time < timeout:
+                    sleep(stop_time)
+                    elapsed_time += stop_time
+                    container.reload()
+                    continue
 
-            server.status = "Running"
-            # Agafem tots els ports del contenidor
-            ports = container.attrs['NetworkSettings']['Ports']
-            # I ens quedem amb el port TCP
-            server.port = ports[f'{MCport}/tcp'][0]['HostPort']
-            server.save()
-        except DockerException as e:
-            print("[Error] start_server: " + e.__str__())
-            return HttpResponse(status=500)
+                server.status = "Running"
+                # Agafem tots els ports del contenidor
+                ports = container.attrs['NetworkSettings']['Ports']
+                # I ens quedem amb el port TCP
+                server.port = ports[f'{MCport}/tcp'][0]['HostPort']
+                server.save()
+            except DockerException as e:
+                print("[Error] start_server: " + e.__str__())
+                return HttpResponse(status=500)
+        else:
+            return HttpResponse(status=403)
     else:
         return HttpResponse(status=403)
     return redirect(f"/server/{server.id}/details")
@@ -269,35 +272,38 @@ def start_server(request, server_id):
 def restart_server(request, server_id):
     server = get_object_or_404(Server, id=server_id)
     if server.user == request.user:
-        try:
-            client = docker.from_env()
-        except DockerException as e:
-            print("[Error] start_server: Docker is not running")
-            raise Exception("Docker is not running")
-        container = client.containers.get(str(server.id))
-        try:
-            container.restart()
-            sleep(3)
-            container.reload()
-            # Configurem un sleep per a esperar fins que el contenidor estigui funcionant per a poder obtenir el port
-            timeout = 120
-            stop_time = 3
-            elapsed_time = 0
-            while elapsed_time < timeout and container.status != 'running':
-                sleep(stop_time)
-                elapsed_time += stop_time
+        if not server.is_expired():
+            try:
+                client = docker.from_env()
+            except DockerException as e:
+                print("[Error] start_server: Docker is not running")
+                raise Exception("Docker is not running")
+            container = client.containers.get(str(server.id))
+            try:
+                container.restart()
+                sleep(3)
                 container.reload()
-                continue
+                # Configurem un sleep per a esperar fins que el contenidor estigui funcionant per a poder obtenir el port
+                timeout = 120
+                stop_time = 3
+                elapsed_time = 0
+                while elapsed_time < timeout and container.status != 'running':
+                    sleep(stop_time)
+                    elapsed_time += stop_time
+                    container.reload()
+                    continue
 
-            server.status = "Running"
-            # Agafem tots els ports del contenidor
-            ports = container.attrs['NetworkSettings']['Ports']
-            # I ens quedem amb el port TCP
-            server.port = ports[f'{MCport}/tcp'][0]['HostPort']
-            server.save()
-        except DockerException as e:
-            print("[Error] restart_server: " + e.__str__())
-            return HttpResponse(status=500)
+                server.status = "Running"
+                # Agafem tots els ports del contenidor
+                ports = container.attrs['NetworkSettings']['Ports']
+                # I ens quedem amb el port TCP
+                server.port = ports[f'{MCport}/tcp'][0]['HostPort']
+                server.save()
+            except DockerException as e:
+                print("[Error] restart_server: " + e.__str__())
+                return HttpResponse(status=500)
+        else:
+            return HttpResponse(status=403)
     else:
         return HttpResponse(status=403)
     return redirect('server-edit', server.id)
