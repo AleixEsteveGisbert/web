@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'channels',
     'Web_App.apps.WebAppConfig',
+    'background_task'
 ]
 
 MIDDLEWARE = [

@@ -1,6 +1,9 @@
+import docker
+from background_task import background
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
+from docker.errors import DockerException
 
 
 def game_images_path(filename):
@@ -54,6 +57,22 @@ class Server(models.Model):
             return False
         current_time = timezone.now()
         return self.expiration_date < current_time
+
+    def stop_expired(self):
+        if self.is_expired():
+            try:
+                client = docker.from_env()
+            except DockerException as e:
+                print("[Error] stop_if_expired: " + e.__str__())
+                raise Exception("Docker is not running")
+            try:
+                container = client.containers.get(str(self.id))
+                container.stop()
+                self.status = "Stopped"
+                self.save()
+            except DockerException as e:
+                print("[Error] stop_if_expired: " + e.__str__())
+                raise Exception("Docker is not running")
 
 
 class ConsoleMessage(models.Model):
