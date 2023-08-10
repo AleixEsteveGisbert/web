@@ -7,18 +7,17 @@
             <hr>
         </div>
         <div class="row">
-            <div class="col-5">
-                <form method="post" class="row">
+            <div class="col-6">
+                <form name="server_add_days" method="post" class="row">
                     {% csrf_token %}
                     {{ form.as_p }}
                     <div class="mt-2">
                         <a role="button" href="{% url 'server-edit' server.id %}" class="btn btn-outline-secondary">Cancelar</a>
-                        <button class="btn btn-primary" type="submit">Confirmar</button>
                     </div>
-
                 </form>
+                <button class="btn btn-primary" onclick="paymentAD()">Confirmar</button>
             </div>
-            <div class="col-4 bg-light rounded p-3">
+            <div class="col-6 bg-light rounded p-3">
                 <div class="row">
                     <div class="col">
                         <h4>CPU</h4>
@@ -44,16 +43,9 @@
                         <h4 id="id_total">0</h4>
                     </div>
                 </div>
-                <br>
-                <div class="row">
-                    <div class="col">
-                        <h4>Balanç després de la compra:</h4>
-                    </div>
-                    <div class="col-3">
-                        <br>
-                        <h4 id="id_post_balance">0</h4>
-                    </div>
-                </div>
+            </div>
+            <div id="missatge" class="col-12 bg-light rounded mt-5" style="display: none">
+                <p class="text-center text-red">Aquest procés pot trigar uns quants minuts. Un moment ...</p>
             </div>
         </div>
     </div>
