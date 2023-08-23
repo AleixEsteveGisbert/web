@@ -11,6 +11,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from docker.errors import DockerException
+from django.http import JsonResponse
 
 from Web_App.forms import LoginForm, RegisterForm, NewServerForm, MinecraftServerPropertiesForm, addDaysForm
 from Web_App.models import Game, Server
@@ -209,6 +210,7 @@ def details_server(request, server_id):
                 server.status = "Running"
                 serverproperties = getFile('/data/server.properties', container)
                 form = MinecraftServerPropertiesForm(initial={'server_properties': serverproperties})
+                console = getFile('/data/logs/latest.log', container)
             else:
                 server.status = "Stopped"
             details = None
@@ -217,17 +219,21 @@ def details_server(request, server_id):
                 details = JavaServer.lookup(server.address + ":" + str(server.port)).status()
             except Exception as e:
                 print(f"[Error] details_server: {e} - ({server.name})")
-
             context = {
                 'form': form,
                 'server': server,
                 'details': details,
                 'container': container,
+                'console': console,
             }
     else:
         return HttpResponse(status=403)
     return render(request, 'controlPanel/server-details-mc.html', context)
 
+    if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+        return JsonResponse({'content': console})
+
+    return render(request, 'controlPanel/server-details.html', context)
 
 @login_required(login_url='login')
 def stop_server(request, server_id):

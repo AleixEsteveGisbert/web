@@ -66,7 +66,8 @@
                                     <p>El servidor va expirar el dia {{ server.expiration_date|date:'d-m-Y H:i' }}</p>
                                 </div>
                                 <div class="modal-footer">
-                                    <a role="button" type="button" href="{% url 'server-adddays' server.id %}" class="btn btn-primary">Ampliar</a>
+                                    <a role="button" type="button" href="{% url 'server-adddays' server.id %}"
+                                       class="btn btn-primary">Ampliar</a>
                                 </div>
                             </div>
                         </div>
@@ -148,9 +149,10 @@
                                             class="btn btn-secondary">Ampliar</a>
                                     </h5>
                                 {% else %}
-                                    <h5 class="text-danger">El servidor va expirar el dia {{ server.expiration_date|date:'d-m-Y H:i' }} <a role="button"
-                                                                                              href="{% url 'server-adddays' server.id %}"
-                                                                                              class="btn btn-secondary">Ampliar</a>
+                                    <h5 class="text-danger">El servidor va expirar el
+                                        dia {{ server.expiration_date|date:'d-m-Y H:i' }} <a role="button"
+                                                                                             href="{% url 'server-adddays' server.id %}"
+                                                                                             class="btn btn-secondary">Ampliar</a>
                                     </h5>
                                 {% endif %}
                             </div>
@@ -160,25 +162,8 @@
                 </div>
                 <div class="tab-pane fade" id="v-pills-console" role="tabpanel" aria-labelledby="v-pills-console-tab"
                      tabindex="0">
-                    <div class="col-9">
-                        <div class="row mt-2 bg-dark text-light" data-height="10">
-                            <br>
-                            <br>
-                            <br>
-                            <br>
-                            <br>
-                            <br>
-                            <br>
-                            <br>
-                            <br>
-                            <br>
-                            <br>
-                            <br>
-                            <br>
-                            <br>
-                            <br>|
-                            <br>
-                        </div>
+                    <div class="col-12">
+                        <div id="console" class="row mt-2 bg-dark text-light" data-height="10" style="max-height: 600px; overflow-y: scroll;"></div>
                         <div class="row mt-2">
                             <div class="col">
                                 <input class="form-control" type="text" name="command" placeholder="/">
@@ -210,8 +195,17 @@
             </div>
         </div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+        function updateLogContent() {
+            $.get(window.location.pathname, function (data) {
+                $('#console').html(data.content.replace(/\n/g, '<br>'));
+                $('#console').scrollTop($('#console')[0].scrollHeight);
+            });
+        }
 
+        // Actualizar cada 1 segundo
+        setInterval(updateLogContent, 3000);
     </script>
 
 {% endblock %}
