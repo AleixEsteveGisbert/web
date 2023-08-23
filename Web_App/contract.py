@@ -1,3 +1,4 @@
+# Arxiu inutil
 from web3 import Web3
 
 alchemy_url = "https://eth-sepolia.g.alchemy.com/v2/5APA3WpSw2ESkV84Qlcy-4ZgFQW9I9_M"

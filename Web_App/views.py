@@ -1,8 +1,9 @@
 import datetime
+import random
+import string
 import sys
 from time import sleep
 
-import websocket
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
@@ -10,7 +11,6 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from docker.errors import DockerException
-from docker.models.networks import Network
 
 from Web_App.forms import LoginForm, RegisterForm, NewServerForm, MinecraftServerPropertiesForm, addDaysForm
 from Web_App.models import Game, Server
@@ -19,11 +19,11 @@ import docker
 from django.http import HttpResponse, HttpRequest
 from web3 import Web3
 from mcstatus import JavaServer
-from Web_App import contract
 
 # https://www.geeksforgeeks.org/django-templates/
 
 MCport = '25565'
+ValheimPort = ['2456', '2457']
 
 
 def main_page(request):
@@ -83,14 +83,14 @@ def new_server(request):
             except DockerException:
                 print("Docker is not running")
                 raise Exception("Docker is not running")
-
             server.save()
-            if server.game.name is "Minecraft":
+            if server.game.name == "Minecraft":
                 try:
                     memory_limit = '1G'
                     container = client.containers.run(
                         'itzg/minecraft-server',
                         name=server.id,
+                        mem_limit=f"{server.ram}g",
                         ports={f'{MCport}/tcp': None, f'{MCport}/udp': None},
                         environment={
                             'EULA': 'TRUE',
@@ -116,16 +116,52 @@ def new_server(request):
                     # I ens quedem amb el port TCP
                     server.port = ports[f'{MCport}/tcp'][0]['HostPort']
                     server.status = "Running"
-                    server.expiration_date = datetime.datetime.now() + datetime.timedelta(days=1)
+                    server.expiration_date = timezone.now() + datetime.timedelta(days=1)
                     server.save()
                 except DockerException as e:
                     server.delete()
                     print("[Error] new_server: " + e.__str__())
                     raise Exception("Error running server")
-            elif server.game.name is "Valheim":
-                pass
+                server.save()
+            elif server.game.name == "Valheim":
+                password = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+                print(f"server id: {server.id}")
+                container = client.containers.run(
+                    "ghcr.io/lloesche/valheim-server",
+                    name=server.id,
+                    mem_limit=f"{server.ram}g",
+                    ports={f'{ValheimPort[0]}/udp': None, f'{ValheimPort[1]}/udp': None},
+                    cap_add="sys_nice",
+                    volumes={
+                        "/home/valheim-server/config": {'bind': '/config', 'mode': 'rw'},
+                        "/home/valheim-server/data": {'bind': '/opt/valheim', 'mode': 'rw'}
+                    },
+                    environment={
+                        "SERVER_NAME": server.name,
+                        "WORLD_NAME": server.name,
+                        "SERVER_PUBLIC": "true",
+                        "SERVER_PASS": password
+                    },
+                    detach=True,
+                )
+                # Configurem un sleep per a esperar fins que el contenidor estigui funcionant per a poder obtenir el port
+                timeout = 120
+                stop_time = 3
+                elapsed_time = 0
+                while container.status != 'running' and elapsed_time < timeout:
+                    sleep(stop_time)
+                    elapsed_time += stop_time
+                    container.reload()
+                    continue
+                # Agafem tots els ports del contenidor
+                ports = container.attrs['NetworkSettings']['Ports']
+                # I ens quedem amb el port TCP
+                server.port = ports[f'{ValheimPort[0]}/udp'][0]['HostPort']
+                server.status = "Running"
+                server.expiration_date = timezone.now() + datetime.timedelta(days=1)
+                server.save()
 
-            elif server.game.name is "Terraria":
+            elif server.game.name == "Terraria":
                 pass
 
             return redirect('dashboard')
@@ -190,7 +226,7 @@ def details_server(request, server_id):
             }
     else:
         return HttpResponse(status=403)
-    return render(request, 'controlPanel/server-details.html', context)
+    return render(request, 'controlPanel/server-details-mc.html', context)
 
 
 @login_required(login_url='login')
