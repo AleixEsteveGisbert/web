@@ -1,6 +1,8 @@
-# Dependències:
+# Module dependencies:
 - django
 - pillow
 - mcstatus
-- web3
-- celery
+- web3 (Not used)
+- celery (Not used)
+- channels
+- 
