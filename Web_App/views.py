@@ -126,6 +126,7 @@ def new_server(request):
                 server.save()
             elif server.game.name == "Valheim":
                 password = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+                server.password = password
                 print(f"server id: {server.id}")
                 container = client.containers.run(
                     "ghcr.io/lloesche/valheim-server",

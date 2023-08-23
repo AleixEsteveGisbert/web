@@ -38,6 +38,7 @@ class Game(models.Model):
 class Server(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     name = models.TextField(default="Server")
+    password = models.TextField(null=True)
     docker_name = models.TextField(null=True)
     address = models.TextField(default="localhost", null=True)
     port = models.IntegerField(default=0, null=True)
