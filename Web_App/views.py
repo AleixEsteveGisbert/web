@@ -77,56 +77,59 @@ def new_server(request):
         if form.is_valid():
             server = form.save(commit=False)
             server.user = request.user
-            memory_limit = '1G'
 
-            try:
-                client = docker.from_env()
-            except DockerException:
-                print("Docker is not running")
-                raise Exception("Docker is not running")
+            if server.game.name is "Minecraft":
+                try:
+                    client = docker.from_env()
+                except DockerException:
+                    print("Docker is not running")
+                    raise Exception("Docker is not running")
 
-            server.save()
-            try:
-                container = client.containers.run(
-                    'itzg/minecraft-server',
-                    name=server.id,
-                    ports={f'{MCport}/tcp': None, f'{MCport}/udp': None},
-                    environment={
-                        'EULA': 'TRUE',
-                        'OVERRIDE_SERVER_PROPERTIES': 'false',
-                        'VERSION': 'latest',
-                        'MEMORY': memory_limit,
-                        'SERVER_NAME': server.name,
-                        'MOTD': "Welcome to server " + server.name,
-
-                    },
-                    detach=True,
-                )
-                # Configurem un sleep per a esperar fins que el contenidor estigui funcionant per a poder obtenir el port
-                timeout = 120
-                stop_time = 3
-                elapsed_time = 0
-                while container.status != 'running' and elapsed_time < timeout:
-                    sleep(stop_time)
-                    elapsed_time += stop_time
-                    container.reload()
-                    continue
-                # Agafem tots els ports del contenidor
-                ports = container.attrs['NetworkSettings']['Ports']
-                # I ens quedem amb el port TCP
-                server.port = ports[f'{MCport}/tcp'][0]['HostPort']
-                server.status = "Running"
-                server.expiration_date = datetime.datetime.now() + datetime.timedelta(days=1)
                 server.save()
-            except DockerException as e:
-                server.delete()
-                print("[Error] new_server: " + e.__str__())
-                raise Exception("Error running server")
+                try:
+                    memory_limit = '1G'
+                    container = client.containers.run(
+                        'itzg/minecraft-server',
+                        name=server.id,
+                        ports={f'{MCport}/tcp': None, f'{MCport}/udp': None},
+                        environment={
+                            'EULA': 'TRUE',
+                            'OVERRIDE_SERVER_PROPERTIES': 'false',
+                            'VERSION': 'latest',
+                            'MEMORY': memory_limit,
+                            'SERVER_NAME': server.name,
+                            'MOTD': "Welcome to server " + server.name,
+
+                        },
+                        detach=True,
+                    )
+                    # Configurem un sleep per a esperar fins que el contenidor estigui funcionant per a poder obtenir el port
+                    timeout = 120
+                    stop_time = 3
+                    elapsed_time = 0
+                    while container.status != 'running' and elapsed_time < timeout:
+                        sleep(stop_time)
+                        elapsed_time += stop_time
+                        container.reload()
+                        continue
+                    # Agafem tots els ports del contenidor
+                    ports = container.attrs['NetworkSettings']['Ports']
+                    # I ens quedem amb el port TCP
+                    server.port = ports[f'{MCport}/tcp'][0]['HostPort']
+                    server.status = "Running"
+                    server.expiration_date = datetime.datetime.now() + datetime.timedelta(days=1)
+                    server.save()
+                except DockerException as e:
+                    server.delete()
+                    print("[Error] new_server: " + e.__str__())
+                    raise Exception("Error running server")
+            elif server.game.name is "Terraria":
+                pass
 
             return redirect('dashboard')
     else:
         form = NewServerForm()
-        contract.spend_host_coins(request, 1)
+        # contract.spend_host_coins(request, 1)
     return render(request, 'controlPanel/server-new.html', {'form': form, 'games': games})
 
 
