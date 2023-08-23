@@ -78,14 +78,14 @@ def new_server(request):
             server = form.save(commit=False)
             server.user = request.user
 
-            if server.game.name is "Minecraft":
-                try:
-                    client = docker.from_env()
-                except DockerException:
-                    print("Docker is not running")
-                    raise Exception("Docker is not running")
+            try:
+                client = docker.from_env()
+            except DockerException:
+                print("Docker is not running")
+                raise Exception("Docker is not running")
 
-                server.save()
+            server.save()
+            if server.game.name is "Minecraft":
                 try:
                     memory_limit = '1G'
                     container = client.containers.run(
@@ -99,7 +99,6 @@ def new_server(request):
                             'MEMORY': memory_limit,
                             'SERVER_NAME': server.name,
                             'MOTD': "Welcome to server " + server.name,
-
                         },
                         detach=True,
                     )
@@ -123,6 +122,9 @@ def new_server(request):
                     server.delete()
                     print("[Error] new_server: " + e.__str__())
                     raise Exception("Error running server")
+            elif server.game.name is "Valheim":
+                pass
+
             elif server.game.name is "Terraria":
                 pass
 
