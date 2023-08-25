@@ -250,10 +250,11 @@ def details_server(request, server_id):
             if container.status == "running":
                 server.status = "Running"
                 serverInfo = getFile('/opt/valheim/htdocs/status.json', container)
+                serverInfo = json.loads(serverInfo)
             else:
                 server.status = "Stopped"
             server.save()
-            serverInfo = json.loads(serverInfo)
+
             context = {
                 'server': server,
                 'container': container,
