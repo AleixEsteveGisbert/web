@@ -174,9 +174,12 @@ def new_server(request):
 
 
 def getFile(path, container):
-    command_read = f'cat {path}'
-    result = container.exec_run(command_read)
-    current_content = result.output.decode('utf-8')
+    try:
+        command_read = f'cat {path}'
+        result = container.exec_run(command_read)
+        current_content = result.output.decode('utf-8')
+    except Exception as e:
+        print(f"[Error] getFile: {e}")
     return current_content
 
 
@@ -207,6 +210,7 @@ def details_server(request, server_id):
                 return redirect('server-edit', server.id)
         else:
             form = MinecraftServerPropertiesForm()
+            console = ''
             if container.status == "running":
                 server.status = "Running"
                 serverproperties = getFile('/data/server.properties', container)
@@ -250,8 +254,8 @@ def stop_server(request, server_id):
             container.stop()
             server.status = "Stopped"
             server.save()
-        except DockerException:
-            print("[Error] stop_server: Can't stop server")
+        except DockerException as e:
+            print(f"[Error] stop_server: {e}")
             raise Exception("Docker is not running")
     else:
         return HttpResponse(status=403)
