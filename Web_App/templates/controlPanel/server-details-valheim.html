@@ -11,9 +11,6 @@
                 <p><b>Contrasenya: </b><i>{{ server.password }}</i></p>
                 <hr>
                 <p><b>Jugadors: </b>{{ serverInfo.player_count }}</p>
-            {% for player in serverInfo.players %}
-                <p>{{ player.name }} {{ player.score }}</p>
-            {% endfor %}
                 <p>{% if container.status == "running" %}
                     <span class="badge text-bg-success">Running</span>
                 {% elif container.status == "restarting" %}

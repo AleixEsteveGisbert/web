@@ -174,20 +174,26 @@ def new_server(request):
         # contract.spend_host_coins(request, 1)
     return render(request, 'controlPanel/server-new.html', {'form': form, 'games': games})
 
-
+# Function to read file content from a container
 def getFile(path, container):
     try:
         command_read = f'cat {path}'
         result = container.exec_run(command_read)
         current_content = result.output.decode('utf-8')
     except Exception as e:
+        current_content = None
         print(f"[Error] getFile: {e}")
     return current_content
 
-
+# Function to update a content of a file in a container
+# TODO
 def updateFile(data, path, container):
-    command_write = f'echo "{data}" > {path}'
-    result = container.exec_run(command_write, detach=False)  # TODO
+    try:
+        command_write = f'echo "{data}" > {path}'
+        result = container.exec_run(command_write, detach=False)
+    except Exception as e:
+        result = None
+        print(f"[Error] getFile: {e}")
     return result.exit_code
 
 
@@ -292,7 +298,6 @@ def update_servers(request):
             else:
                 server.status = "Stopped"
             server.save()
-
         except DockerException as e:
             print(f"[Error] update_servers: {e}")
             raise Exception(e)
@@ -385,9 +390,9 @@ def delete_server(request, server_id):
     if server.user == request.user:
         try:
             client = docker.from_env()
-        except DockerException:
-            print("[Error] start_server: Docker is not running")
-            raise Exception("Docker is not running")
+        except DockerException as e:
+            print(f"[Error] start_server: {e}")
+            raise Exception(f"[Error] start_server: {e}")
         container = client.containers.get(str(server.id))
         try:
             container.stop()
