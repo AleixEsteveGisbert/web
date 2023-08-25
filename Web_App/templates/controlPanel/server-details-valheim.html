@@ -1,0 +1,206 @@
+{% extends 'controlPanel/template.html' %}
+{% block title %}{{ server.name }} | Detalls{% endblock %}
+
+{% block content %}
+    <div class="row content">
+        <div class="col-sm-3 sidenav d-flex flex-column flex-shrink-0 p-3" style="width: 280px;">
+            <div class="bg-light">
+                {% load static %}
+                <span class="fs-4"><img src="{% static server.game.image %}" height="50rem">{{ server.name }}</span>
+                <p><b>IP: </b>{{ server.address }}:{{ server.port }}</p>
+                <p><b>Contrasenya: </b><i>{{ server.password }}</i></p>
+                <hr>
+                <p><b>Jugadors: </b>{{ serverInfo.player_count }}</p>
+            {% for player in serverInfo.players %}
+                <p>{{ player.name }} {{ player.score }}</p>
+            {% endfor %}
+                <p>{% if container.status == "running" %}
+                    <span class="badge text-bg-success">Running</span>
+                {% elif container.status == "restarting" %}
+                    <span class="badge text-bg-warning">Restarting</span>
+                {% else %}
+                    <span class="badge text-bg-danger">Stopped</span>
+                {% endif %}</p>
+
+            </div>
+            <hr>
+            <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                <button class="nav-link active" id="v-pills-info-tab" data-bs-toggle="pill"
+                        data-bs-target="#v-pills-info" type="button" role="tab" aria-controls="v-pills-info"
+                        aria-selected="true"><i class="fa-solid fa-circle-info"></i>Info
+                </button>
+                <button class="nav-link" id="v-pills-console-tab" data-bs-toggle="pill"
+                        data-bs-target="#v-pills-console" type="button" role="tab" aria-controls="v-pills-console"
+                        aria-selected="false"><i class="fa-solid fa-terminal"></i>Consola
+                </button>
+                <button class="nav-link" id="v-pills-config-tab" data-bs-toggle="pill"
+                        data-bs-target="#v-pills-config" type="button" role="tab" aria-controls="v-pills-config"
+                        aria-selected="false"><i class="fa-solid fa-gear"></i>Configuració
+                </button>
+                <button class="nav-link" id="v-pills-ftp-tab" data-bs-toggle="pill"
+                        data-bs-target="#v-pills-ftp" type="button" role="tab" aria-controls="v-pills-ftp"
+                        aria-selected="false"><i class="fa-solid fa-folder"></i>FTP
+                </button>
+            </div>
+            <hr>
+        </div>
+        <div class="col-sm-9 mt-3">
+
+            {% if container.status == "running" %}
+                <a role="button" href="{% url 'server-stop' container.name %}" class="btn btn-danger">Aturar</a>
+                <a role="button" href="{% url 'server-restart' container.name %}" class="btn btn-warning">Reiniciar</a>
+            {% else %}
+                {% if not server.is_expired %}
+                    <a role="button" href="{% url 'server-start' container.name %}" class="btn btn-success">Iniciar</a>
+                {% else %}
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#expiredModal">
+                        Iniciar
+                    </button>
+                    <div class="modal fade" id="expiredModal" tabindex="-1" aria-labelledby="expiredModalLabel"
+                         aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="expiredModalLabel">El servidor ha expirat!</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>El servidor va expirar el dia {{ server.expiration_date|date:'d-m-Y H:i' }}</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <a role="button" type="button" href="{% url 'server-adddays' server.id %}"
+                                       class="btn btn-primary">Ampliar</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endif %}
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                    data-bs-target="#Modal{{ server.id }}">
+                <i class="fa-solid fa-trash-can"></i>
+            </button>
+
+            <!-- Delete Modal -->
+            <div class="modal fade" id="Modal{{ server.id }}" tabindex="-1"
+                 aria-labelledby="ModalLabel{{ server.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5"
+                                id="ModalLabel{{ server.id }}">Eliminar
+                                servidor</h1>
+                            <button type="button" class="btn-close"
+                                    data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Estas segur que vols eliminar el servidor
+                            <b>{{ server.name }}</b><br>
+                            No podras recuperar el servidor!
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary"
+                                    data-bs-dismiss="modal">Cancelar
+                            </button>
+                            <a type="button" role="button" class="btn btn-danger"
+                               href="{% url 'server-delete' server.id %}">Eliminar</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-content" id="v-pills-tabContent">
+                <div class="tab-pane fade show active" id="v-pills-info" role="tabpanel"
+                     aria-labelledby="v-pills-info-tab" tabindex="0">
+                    <div class="container mt-5">
+                        <div class="row align-items-center">
+                            <div class="col-2">
+                                <h3>RAM</h3>
+                            </div>
+                            <div class="col-sm">
+
+                            </div>
+                            <div class="col-2">
+                                <h3>CPU</h3>
+                            </div>
+                            <div class="col-sm">
+
+                            </div>
+                        </div>
+                        <div class="row align-items-center">
+                            <div class="col-2">
+                                <i class="fa-solid fa-microchip fa-5x"></i>
+                            </div>
+                            <div class="col-sm">
+                                <h3>{{ server.ram|floatformat }}</h3>
+                            </div>
+                            <div class="col-2">
+                                <i class="fa-solid fa-memory fa-5x"></i>
+                            </div>
+                            <div class="col-sm">
+                                <h3>{{ server.cores|floatformat }}</h3>
+                            </div>
+                        </div>
+                        <div class="row align-items-center mt-5">
+                            <div class="col">
+                                {% if not server.is_expired %}
+                                    <h5>Utilitzable fins el {{ server.expiration_date|date:'d-m-Y H:i' }} <a
+                                            role="button"
+                                            href="{% url 'server-adddays' server.id %}"
+                                            class="btn btn-secondary">Ampliar</a>
+                                    </h5>
+                                {% else %}
+                                    <h5 class="text-danger">El servidor va expirar el
+                                        dia {{ server.expiration_date|date:'d-m-Y H:i' }} <a role="button"
+                                                                                             href="{% url 'server-adddays' server.id %}"
+                                                                                             class="btn btn-secondary">Ampliar</a>
+                                    </h5>
+                                {% endif %}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="v-pills-console" role="tabpanel" aria-labelledby="v-pills-console-tab"
+                     tabindex="0">
+                    <div class="col-12">
+                        <div id="console" class="row mt-2 bg-dark text-light" data-height="10" style="max-height: 600px; overflow-y: scroll;"></div>
+                        <div class="row mt-2">
+                            <div class="col">
+                                <input class="form-control" type="text" name="command" placeholder="/">
+                            </div>
+                            <div class="col-2">
+                                <input class="form-control btn btn-primary" type="button" value="Enviar">
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+                <div class="tab-pane fade" id="v-pills-config" role="tabpanel" aria-labelledby="v-pills-config-tab"
+                     tabindex="0">
+                    <div>
+                        {% if server.status == "Running" %}
+                            <form method="POST">{% csrf_token %}
+                                {{ form.as_p }}
+                                <button class="btn btn-primary" type="submit">Guardar els canvis</button>
+                            </form>
+                        {% else %}
+                            <h5>Inicia el servidor per a fer canvis en la configuració</h5>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="v-pills-ftp" role="tabpanel" aria-labelledby="v-pills-ftp-tab"
+                     tabindex="0">ftp
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+
+    </script>
+
+{% endblock %}

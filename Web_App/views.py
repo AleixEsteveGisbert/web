@@ -1,4 +1,5 @@
 import datetime
+import json
 import random
 import string
 import sys
@@ -142,7 +143,8 @@ def new_server(request):
                         "SERVER_NAME": server.name,
                         "WORLD_NAME": server.name,
                         "SERVER_PUBLIC": "true",
-                        "SERVER_PASS": password
+                        "SERVER_PASS": password,
+                        "STATUS_HTTP": "true"
                     },
                     detach=True,
                 )
@@ -192,6 +194,8 @@ def updateFile(data, path, container):
 @login_required(login_url='login')
 def details_server(request, server_id):
     server = get_object_or_404(Server, id=server_id)
+    console = ''
+    context = ''
     if server.user == request.user:
         try:
             client = docker.from_env()
@@ -201,44 +205,58 @@ def details_server(request, server_id):
             print("[Error] details_server: Docker is not running")
             raise Exception("Docker is not running")
         container = client.containers.get(str(server.id))
+        if server.game.name == "Minecraft":
+            if request.method == 'POST':
+                form = MinecraftServerPropertiesForm(request.POST)
+                if form.is_valid():
+                    server_properties = form.cleaned_data['server_properties']
+                    updateFile(server_properties, '/data/server.properties', container)
+                    return redirect('server-edit', server.id)
+            else:
+                form = MinecraftServerPropertiesForm()
+                if container.status == "running":
+                    server.status = "Running"
+                    serverproperties = getFile('/data/server.properties', container)
+                    form = MinecraftServerPropertiesForm(initial={'server_properties': serverproperties})
+                    console = getFile('/data/logs/latest.log', container)
+                else:
+                    server.status = "Stopped"
+                details = None
+                server.save()
+                try:
+                    details = JavaServer.lookup(server.address + ":" + str(server.port)).status()
+                except Exception as e:
+                    print(f"[Error] details_server: {e} - ({server.name})")
+                context = {
+                    'form': form,
+                    'server': server,
+                    'details': details,
+                    'container': container,
+                    'console': console,
+                }
+                if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+                    return JsonResponse({'content': console})
 
-        if request.method == 'POST':
-            form = MinecraftServerPropertiesForm(request.POST)
-            if form.is_valid():
-                server_properties = form.cleaned_data['server_properties']
-                updateFile(server_properties, '/data/server.properties', container)
-                return redirect('server-edit', server.id)
-        else:
-            form = MinecraftServerPropertiesForm()
-            console = ''
+                return render(request, 'controlPanel/server-details-mc.html', context)
+
+        elif server.game.name == "Valheim":
+            serverInfo = None
             if container.status == "running":
                 server.status = "Running"
-                serverproperties = getFile('/data/server.properties', container)
-                form = MinecraftServerPropertiesForm(initial={'server_properties': serverproperties})
-                console = getFile('/data/logs/latest.log', container)
+                serverInfo = getFile('/opt/valheim/htdocs/status.json', container)
             else:
                 server.status = "Stopped"
-            details = None
             server.save()
-            try:
-                details = JavaServer.lookup(server.address + ":" + str(server.port)).status()
-            except Exception as e:
-                print(f"[Error] details_server: {e} - ({server.name})")
+            serverInfo = json.loads(serverInfo)
             context = {
-                'form': form,
                 'server': server,
-                'details': details,
                 'container': container,
-                'console': console,
+                'serverInfo': serverInfo,
             }
+            return render(request, 'controlPanel/server-details-valheim.html', context)
     else:
         return HttpResponse(status=403)
-    return render(request, 'controlPanel/server-details-mc.html', context)
 
-    if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
-        return JsonResponse({'content': console})
-
-    return render(request, 'controlPanel/server-details.html', context)
 
 @login_required(login_url='login')
 def stop_server(request, server_id):
