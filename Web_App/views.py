@@ -196,6 +196,14 @@ def updateFile(data, path, container):
         print(f"[Error] getFile: {e}")
     return result.exit_code
 
+def executeCommand(command, container):
+    try:
+        command_write = command
+        result = container.exec_run(command_write, detach=False)
+    except Exception as e:
+        result = None
+        print(f"[Error] executeCommand: {e}")
+    return result.exit_code
 
 @login_required(login_url='login')
 def details_server(request, server_id):
