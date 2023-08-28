@@ -75,8 +75,3 @@ class Server(models.Model):
                 print("[Error] stop_if_expired: " + e.__str__())
                 raise Exception("Docker is not running")
 
-
-class ConsoleMessage(models.Model):
-    server = models.ForeignKey(Server, on_delete=models.CASCADE)
-    message = models.TextField(null=True)
-    created_at = models.DateTimeField(default=timezone.now)

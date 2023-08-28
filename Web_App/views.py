@@ -197,12 +197,12 @@ def getFile(path, container):
 
 def updateFile(data, path, container):
     try:
-        command_write = f'echo "{data}" > {path}'
+        command_write = f'bash -c "echo {data} > {path}"'
         result = container.exec_run(command_write, detach=False)
     except Exception as e:
         result = None
-        print(f"[Error] getFile: {e}")
-    return result.exit_code
+        print(f"[Error] updateFile: {e}")
+    return result
 
 
 def executeCommand(command, container):
@@ -252,7 +252,8 @@ def details_server(request, server_id):
                 form = MinecraftServerPropertiesForm(request.POST)
                 if form.is_valid():
                     server_properties = form.cleaned_data['server_properties']
-                    updateFile(server_properties, '/data/server.properties', container)
+                    res = updateFile(server_properties, '/data/server.properties', container)
+                    print(res)
                     return redirect('server-edit', server.id)
             else:
                 form = MinecraftServerPropertiesForm()
