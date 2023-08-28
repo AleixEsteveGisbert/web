@@ -163,13 +163,15 @@
                 <div class="tab-pane fade" id="v-pills-console" role="tabpanel" aria-labelledby="v-pills-console-tab"
                      tabindex="0">
                     <div class="col-12">
-                        <div id="console" class="row mt-2 bg-dark text-light" data-height="10" style="max-height: 600px; overflow-y: scroll;"></div>
+                        <div id="console" class="row mt-2 bg-dark text-light" data-height="10"
+                             style="max-height: 600px; overflow-y: scroll;"></div>
                         <div class="row mt-2">
                             <div class="col">
-                                <input class="form-control" type="text" name="command" placeholder="/">
+                                <input id="command" class="form-control" type="text" name="command" placeholder="/">
                             </div>
                             <div class="col-2">
-                                <input class="form-control btn btn-primary" type="button" value="Enviar">
+                                <input id="sendCommand" class="form-control btn btn-primary" type="button"
+                                       value="Executar">
                             </div>
 
                         </div>
@@ -204,7 +206,28 @@
             });
         }
 
-        // Actualizar cada 1 segundo
+        $("#sendCommand").click(function () {
+            let url = window.location.pathname
+            let urlA = url.split("/")
+            let id = urlA[2]
+            let command = $('#command').val()
+            $('#command').val('')
+            let csrfToken = $("input[name='csrfmiddlewaretoken']").val();
+            $.ajax({
+                type: "POST",
+                url: "/server/" + id + "/execute",
+                data: {
+                    csrfmiddlewaretoken: csrfToken,
+                    command: command
+                },
+                success: function (response) {
+                    updateLogContent();
+                },
+                error: function (xhr, errmsg, err) {
+                    console.log(err)
+                }
+            });
+        });
         setInterval(updateLogContent, 3000);
     </script>
 

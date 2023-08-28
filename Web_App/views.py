@@ -1,4 +1,5 @@
 import datetime
+import http
 import json
 import random
 import string
@@ -21,8 +22,6 @@ import docker
 from django.http import HttpResponse, HttpRequest
 from web3 import Web3
 from mcstatus import JavaServer
-
-# https://www.geeksforgeeks.org/django-templates/
 
 MCport = '25565'
 ValheimPort = ['2456', '2457']
@@ -81,9 +80,9 @@ def new_server(request):
             server.user = request.user
             try:
                 client = docker.from_env()
-            except DockerException:
+            except DockerException as e:
                 print("Docker is not running")
-                raise Exception("Docker is not running")
+                raise Exception(f"[Error] new_server: {e.__str__()}")
             server.save()
             if server.id < 10:
                 server.delete()
@@ -181,6 +180,7 @@ def new_server(request):
 
 
 # Function to read file content from a container
+
 def getFile(path, container):
     try:
         command_read = f'cat {path}'
@@ -194,6 +194,7 @@ def getFile(path, container):
 
 # Function to update a content of a file in a container
 # TODO
+
 def updateFile(data, path, container):
     try:
         command_write = f'echo "{data}" > {path}'
@@ -213,6 +214,24 @@ def executeCommand(command, container):
         print(f"[Error] executeCommand: {e}")
     return result.exit_code
 
+@login_required(login_url='login')
+def executeCommandMinecraft(request, server_id):
+    server = get_object_or_404(Server, id=server_id)
+    if server.user == request.user:
+        try:
+            client = docker.from_env()
+            container = client.containers.get(str(server.id))
+        except DockerException as e:
+            server.status = "Stopped"
+            server.save()
+            print(f"[Error] executeCommandMinecraft: {e.__str__()}")
+            raise Exception(f"[Error] executeCommandMinecraft: {e.__str__()}")
+        if request.method == 'POST':
+            command = request.POST.get('command')
+            command = f"mc-send-to-console {command}"
+            executeCommand(command, container)
+        return HttpResponse(status=200)
+    return HttpResponse(status=500)
 
 @login_required(login_url='login')
 def details_server(request, server_id):
@@ -319,7 +338,7 @@ def update_servers(request):
         except DockerException as e:
             print(f"[Error] update_servers: {e}")
             raise Exception(e)
-    return redirect("/dashboard")
+    return redirect('dashboard')
 
 
 @login_required(login_url='login')
@@ -358,7 +377,7 @@ def start_server(request, server_id):
             return HttpResponse(status=403)
     else:
         return HttpResponse(status=403)
-    return redirect(f"/server/{server.id}/details")
+    return redirect('server-edit', server.id)
 
 
 @login_required(login_url='login')

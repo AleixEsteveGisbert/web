@@ -42,6 +42,7 @@ urlpatterns = [
     path('server/<int:server_id>/delete', views.delete_server, name='server-delete'),
     path('server/<int:server_id>/details', views.details_server, name='server-edit'),
     path('server/<int:server_id>/adddays', views.adddays, name='server-adddays'),
+    path('server/<int:server_id>/execute', views.executeCommandMinecraft, name='server-execute-mc'),
 
     path('server/<int:server_id>/setexpirationdate', views.set_expiration_date, name='server-set-expiration-date'),
 

@@ -1,7 +1,3 @@
-//contractAddress = '0x9bd113f79D9bCdc27E06bDc5a08A27c274512Ee8'; // SmartContract TokenExchange1
-//contractAddress = '0x7Bd57f1a0f45Eb5C005C07Ef09820D92a2299de4';
-//contractAddress = '0xd9145CCE52D386f254917e481eB44e9943F39138'; // 4
-//contractAddress = '0xd8b934580fcE35a11B58C6D73aDeE468a2833fa8'; // 5
 contractAddress = "0x0Ff0705efe9fb8A300047A365f39BEFfA86D7c6f"; // NOSEKIN IA
 var walletAddress;
 
