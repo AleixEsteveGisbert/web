@@ -123,6 +123,7 @@ async function spendHostCoins(amount) {
 
     } catch (error) {
         console.error('Error al gastar HostCoin:', error);
+        location.replace("/wallet")
     }
 }
 

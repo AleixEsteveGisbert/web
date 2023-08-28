@@ -79,13 +79,15 @@ def new_server(request):
         if form.is_valid():
             server = form.save(commit=False)
             server.user = request.user
-
             try:
                 client = docker.from_env()
             except DockerException:
                 print("Docker is not running")
                 raise Exception("Docker is not running")
             server.save()
+            if server.id < 10:
+                server.delete()
+                server.id = 10
             if server.game.name == "Minecraft":
                 try:
                     memory_limit = '1G'
@@ -123,48 +125,51 @@ def new_server(request):
                 except DockerException as e:
                     server.delete()
                     print("[Error] new_server: " + e.__str__())
-                    raise Exception("Error running server")
+                    raise Exception("[Error] new_server: " + e.__str__())
                 server.save()
             elif server.game.name == "Valheim":
-                password = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
-                server.password = password
-                print(f"server id: {server.id}")
-                container = client.containers.run(
-                    "ghcr.io/lloesche/valheim-server",
-                    name=server.id,
-                    mem_limit=f"{server.ram}g",
-                    ports={f'{ValheimPort[0]}/udp': None, f'{ValheimPort[1]}/udp': None},
-                    cap_add="sys_nice",
-                    volumes={
-                        "/home/valheim-server/config": {'bind': '/config', 'mode': 'rw'},
-                        "/home/valheim-server/data": {'bind': '/opt/valheim', 'mode': 'rw'}
-                    },
-                    environment={
-                        "SERVER_NAME": server.name,
-                        "WORLD_NAME": server.name,
-                        "SERVER_PUBLIC": "true",
-                        "SERVER_PASS": password,
-                        "STATUS_HTTP": "true"
-                    },
-                    detach=True,
-                )
-                # Configurem un sleep per a esperar fins que el contenidor estigui funcionant per a poder obtenir el port
-                timeout = 120
-                stop_time = 3
-                elapsed_time = 0
-                while container.status != 'running' and elapsed_time < timeout:
-                    sleep(stop_time)
-                    elapsed_time += stop_time
-                    container.reload()
-                    continue
-                # Agafem tots els ports del contenidor
-                ports = container.attrs['NetworkSettings']['Ports']
-                # I ens quedem amb el port TCP
-                server.port = ports[f'{ValheimPort[0]}/udp'][0]['HostPort']
-                server.status = "Running"
-                server.expiration_date = timezone.now() + datetime.timedelta(days=1)
-                server.save()
-
+                try:
+                    password = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+                    server.password = password
+                    container = client.containers.run(
+                        "ghcr.io/lloesche/valheim-server",
+                        name=server.id,
+                        mem_limit=f"{server.ram}g",
+                        ports={f'{ValheimPort[0]}/udp': None, f'{ValheimPort[1]}/udp': None},
+                        cap_add="sys_nice",
+                        volumes={
+                            "/home/valheim-server/config": {'bind': '/config', 'mode': 'rw'},
+                            "/home/valheim-server/data": {'bind': '/opt/valheim', 'mode': 'rw'}
+                        },
+                        environment={
+                            "SERVER_NAME": server.name,
+                            "WORLD_NAME": server.name,
+                            "SERVER_PUBLIC": "true",
+                            "SERVER_PASS": password,
+                            "STATUS_HTTP": "true"
+                        },
+                        detach=True,
+                    )
+                    # Configurem un sleep per a esperar fins que el contenidor estigui funcionant per a poder obtenir el port
+                    timeout = 120
+                    stop_time = 3
+                    elapsed_time = 0
+                    while container.status != 'running' and elapsed_time < timeout:
+                        sleep(stop_time)
+                        elapsed_time += stop_time
+                        container.reload()
+                        continue
+                    # Agafem tots els ports del contenidor
+                    ports = container.attrs['NetworkSettings']['Ports']
+                    # I ens quedem amb el port TCP
+                    server.port = ports[f'{ValheimPort[0]}/udp'][0]['HostPort']
+                    server.status = "Running"
+                    server.expiration_date = timezone.now() + datetime.timedelta(days=1)
+                    server.save()
+                except DockerException as e:
+                    server.delete()
+                    print("[Error] new_server: " + e.__str__())
+                    raise Exception("[Error] new_server: " + e.__str__())
             elif server.game.name == "Terraria":
                 pass
 
@@ -173,6 +178,7 @@ def new_server(request):
         form = NewServerForm()
         # contract.spend_host_coins(request, 1)
     return render(request, 'controlPanel/server-new.html', {'form': form, 'games': games})
+
 
 # Function to read file content from a container
 def getFile(path, container):
@@ -185,6 +191,7 @@ def getFile(path, container):
         print(f"[Error] getFile: {e}")
     return current_content
 
+
 # Function to update a content of a file in a container
 # TODO
 def updateFile(data, path, container):
@@ -196,6 +203,7 @@ def updateFile(data, path, container):
         print(f"[Error] getFile: {e}")
     return result.exit_code
 
+
 def executeCommand(command, container):
     try:
         command_write = command
@@ -204,6 +212,7 @@ def executeCommand(command, container):
         result = None
         print(f"[Error] executeCommand: {e}")
     return result.exit_code
+
 
 @login_required(login_url='login')
 def details_server(request, server_id):
