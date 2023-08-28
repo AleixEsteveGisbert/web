@@ -45,7 +45,7 @@ class NewServerForm(forms.ModelForm):
 
     cores = forms.ChoiceField(choices=[('1', '1'), ('2', '2'), ('4', '4')], widget=forms.Select(attrs={'class': 'form-select'}))
     ram = forms.ChoiceField(choices=[('1', '1'), ('2', '2'), ('4', '4'), ('6', '6'), ('8', '8')], widget=forms.Select(attrs={'class': 'form-select'}))
-    game = forms.ModelChoiceField(widget=forms.Select(attrs={'class': 'form-select'}), queryset=Game.objects.all())
+    game = forms.ModelChoiceField(widget=forms.Select(attrs={'class': 'form-select'}), queryset=Game.objects.filter(active=True))
 
     # name.widget.attrs.update({'class': 'form-control'})
 

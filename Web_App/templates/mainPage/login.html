@@ -1,12 +1,12 @@
 {% extends 'mainPage/template.html' %}
-
+{% block title %}Login | Gamesave{% endblock %}
 {% block content %}
-  <div class="container col-sm-4">
-    <h1>Iniciar sessió</h1>
-    <form method="post">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <button type="submit" class="btn btn-primary">Iniciar sesión</button>
-    </form>
-  </div>
+    <div class="container col-sm-4 mt-5">
+        <h1>Iniciar sessió</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Iniciar sesión</button>
+        </form>
+    </div>
 {% endblock %}

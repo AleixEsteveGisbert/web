@@ -30,6 +30,7 @@ class Game(models.Model):
     image = models.ImageField(upload_to=game_images_path, null=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True, null=True)
+    active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
