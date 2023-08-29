@@ -286,8 +286,11 @@ def details_server(request, server_id):
             serverInfo = None
             if container.status == "running":
                 server.status = "Running"
-                serverInfo = getFile('/opt/valheim/htdocs/status.json', container)
-                serverInfo = json.loads(serverInfo)
+                try:
+                    serverInfo = getFile('/opt/valheim/htdocs/status.json', container)
+                    serverInfo = json.loads(serverInfo)
+                except Exception as e:
+                    print(f"[Error] details_server:{e}")
             else:
                 server.status = "Stopped"
             server.save()
