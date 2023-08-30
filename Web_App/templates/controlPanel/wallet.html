@@ -39,7 +39,7 @@
     <div class="container mt-5 text-center">
         <div class="row justify-content-center">
             <div class="col-1">
-                <input id="hostCoinAmount" min="1" class="form-control" type="number">
+                <input id="hostCoinAmount" pattern="[0-9]" min="1" class="form-control" type="number">
             </div>
             <div class="col-2">
                 <button id="buyButton" class="form-control btn btn-primary disabled" onclick="buyTokens(1)">Comprar
@@ -74,10 +74,11 @@
                 $('#buyButton').removeClass("disabled");
                 eth = hostCoins * 0.0001;
                 eur = hostCoins * 0.17;
-                ethP.text("≈ " + eth.toFixed(4) + " ETH");
-                eurP.text("≈ " + eur.toFixed(2) + " €");
+                ethP.text("~ " + eth.toFixed(4) + " ETH");
+                eurP.text("~ " + eur.toFixed(2) + " €");
             } else {
-
+                ethP.text("");
+                eurP.text("");
                 $('#buyButton').addClass("disabled");
             }
         });
