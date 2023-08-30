@@ -10,17 +10,9 @@ def game_images_path(filename):
     return 'games/game_{0}'.format(filename)
 
 
-# Create your models here.
-class Wallet(models.Model):
-    balance = models.DecimalField(decimal_places=8, max_digits=12, default=0)
-    created_at = models.DateTimeField(default=timezone.now)
-    updated_at = models.DateTimeField(auto_now=True, null=True)
-
-
 class UserInfo(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     avatar = models.TextField(null=True)
-    wallet = models.OneToOneField(Wallet, on_delete=models.CASCADE)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 

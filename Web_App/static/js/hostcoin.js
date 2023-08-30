@@ -68,15 +68,18 @@ function getBalances(walletAddress) {
 
 // Comprar HostCoin
 // 0.0001 ether = 1 hostcoin = 0.17~ centims d'euro
-async function buyTokens(amount) {
+async function buyTokens() {
     try {
+
+        let amount = $('#hostCoinAmount').val();
         await window.ethereum.request({method: 'eth_requestAccounts'});
 
         const web3 = new Web3(window.ethereum);
         const accounts = await web3.eth.getAccounts();
         const userAccount = accounts[0];
         const tokenExchangeContract = new web3.eth.Contract(contractAbi, contractAddress);
-
+        $('#errorDiv').hide();
+        $('#infoDiv').show();
         const tokenPrice = await tokenExchangeContract.methods.tokenPrice().call();
         const totalCost = tokenPrice * amount;
 
@@ -86,11 +89,14 @@ async function buyTokens(amount) {
         });
 
         //Això s'executa quan s'ha completat la transacció
-        console.log('Tokens comprats exitosament');
-        // accions adicionals
 
+        console.log(amount + ' Tokens comprats exitosament');
+        // accions adicionals
+        location.reload()
     } catch (error) {
         console.error('Error al comprar tokens:', error);
+        $('#infoDiv').hide();
+        $('#errorDiv').show();
     }
 }
 

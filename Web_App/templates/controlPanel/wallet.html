@@ -3,29 +3,19 @@
 {% block content %}
     <script src="https://cdn.jsdelivr.net/npm/web3@1.5.3/dist/web3.min.js"></script>
     <style>
-        .balance-box {
-            background-color: #f8f9fa;
-            border: 1px solid #ced4da;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-        }
-
         .icon {
             font-size: 48px;
             color: #627eea;
         }
     </style>
-    </head>
-    <body>
-    <div class="container mt-4">
-        <div class="row">
-            <div class="balance-box col-6">
+    <div class="container mt-4 text-center">
+        <div class="row g-2">
+            <div class="p-2 col-6">
                 <i class="fab fa-ethereum icon"></i>
                 <h3>Balance de Ethereum</h3>
                 <p id="ETHbalance"></p>
             </div>
-            <div class="balance-box col-6">
+            <div class="col-6">
                 {% load static %}
                 <i class=""><img src="{% static 'logo/hostcoin.png' %}" width="48px"></i>
                 <h3>Balance de Hostcoin</h3>
@@ -36,31 +26,60 @@
 
         </div>
     </div>
-    <div class="container mt-4">
+    <div class="container mt-3 text-center">
         <div class="row">
-            <div class="balance-box col-12">
-                <i class="fas fa-wallet icon"></i>
+            <div class="col-12">
+                <i class="fas fa-wallet icon text-black"></i>
                 <h3>Dirección de cartera: </h3>
-                <p style="font-size: 30px" id="walletAddress"></p>
-                <button onclick="getWalletAddress()">Obtenir direcció de cartera</button>
+                <p id="walletAddress"></p>
             </div>
         </div>
     </div>
 
-    <div class="container mt-4">
-        <div class="row">
-            <div class="balance-box col-12">
-                <button onclick="buyTokens(1)">Comprar 1 HostCoin</button>
-                <button onclick="buyTokens(100)">Comprar 100 HostCoin</button>
+    <div class="container mt-5 text-center">
+        <div class="row justify-content-center">
+            <div class="col-1">
+                <input id="hostCoinAmount" min="1" class="form-control" type="number">
+            </div>
+            <div class="col-2">
+                <button id="buyButton" class="form-control btn btn-primary disabled" onclick="buyTokens(1)">Comprar
+                    HostCoin
+                </button>
             </div>
         </div>
     </div>
+    <div class="container mt-3 text-center">
+        <div class="row">
+            <p id="ethPrice" class=""></p>
+        </div>
+        <div class="row">
+            <p id="eurPrice" class=""></p>
+        </div>
+    </div>
+    <div style="display: none" id="infoDiv" class="container mt-5 alert alert-info" role="alert">
+        Confirma la transacció i espera mentre es compren els teus HostCoins.
+    </div>
+    <div style="display: none" id="errorDiv" class="container mt-5 alert alert-danger" role="alert">
+        Ha hagut un error en comprar els teus HostCoins. Recarrega la pàgina i torna-ho a intentar
+    </div>
+    <script>
+        // 0.0001 ether = 1 hostcoin = 0.17~ centims d'euro
+        $('#hostCoinAmount').on('input', function () {
+            let hostCoins = $('#hostCoinAmount').val()
+            let ethP = $('#ethPrice');
+            let eurP = $('#eurPrice');
+            let eth, eur = 0;
 
-    <div class="container mt-4">
-        <div class="row">
-            <div class="balance-box col-12">
-                <button onclick="spendHostCoins(1)">Gastar 1 HostCoin</button>
-            </div>
-        </div>
-    </div>
+            if (hostCoins.length > 0) {
+                $('#buyButton').removeClass("disabled");
+                eth = hostCoins * 0.0001;
+                eur = hostCoins * 0.17;
+                ethP.text("≈ " + eth.toFixed(4) + " ETH");
+                eurP.text("≈ " + eur.toFixed(2) + " €");
+            } else {
+
+                $('#buyButton').addClass("disabled");
+            }
+        });
+    </script>
 {% endblock %}

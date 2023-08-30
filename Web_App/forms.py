@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordChangeForm
 from django.contrib.auth.models import User
 
-from Web_App.models import UserInfo, Wallet, Server, Game
+from Web_App.models import UserInfo, Server, Game
 
 
 class LoginForm(AuthenticationForm):
