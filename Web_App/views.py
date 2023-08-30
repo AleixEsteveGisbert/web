@@ -145,7 +145,8 @@ def new_server(request):
                             "WORLD_NAME": server.name,
                             "SERVER_PUBLIC": "true",
                             "SERVER_PASS": password,
-                            "STATUS_HTTP": "true"
+                            "STATUS_HTTP": "true",
+                            "SYSLOG_REMOTE_AND_LOCAL": "true"
                         },
                         detach=True,
                     )
@@ -212,7 +213,7 @@ def executeCommand(command, container):
     except Exception as e:
         result = None
         print(f"[Error] executeCommand: {e}")
-    return result.exit_code
+    return result
 
 @login_required(login_url='login')
 def executeCommandMinecraft(request, server_id):
@@ -284,7 +285,12 @@ def details_server(request, server_id):
 
         elif server.game.name == "Valheim":
             serverInfo = None
+            console = ""
             if container.status == "running":
+                command = "bash -c 'ls /var/log/supervisor/valheim-server-stdout---supervisor-*.log'"
+                res = executeCommand(command, container)
+                res1 = res.output.decode("utf-8")
+                console = getFile(res1, container)
                 server.status = "Running"
                 try:
                     serverInfo = getFile('/opt/valheim/htdocs/status.json', container)
@@ -299,6 +305,7 @@ def details_server(request, server_id):
                 'server': server,
                 'container': container,
                 'serverInfo': serverInfo,
+                'console': console
             }
             return render(request, 'controlPanel/server-details-valheim.html', context)
     else:
@@ -372,7 +379,10 @@ def start_server(request, server_id):
                 # Agafem tots els ports del contenidor
                 ports = container.attrs['NetworkSettings']['Ports']
                 # I ens quedem amb el port TCP
-                server.port = ports[f'{MCport}/tcp'][0]['HostPort']
+                if server.game == "Minecraft":
+                    server.port = ports[f'{MCport}/tcp'][0]['HostPort']
+                elif server.game.name == "Valheim":
+                    server.port = ports[f'{ValheimPort[0]}/udp'][0]['HostPort']
                 server.save()
             except DockerException as e:
                 print("[Error] start_server: " + e.__str__())
@@ -413,7 +423,10 @@ def restart_server(request, server_id):
                 # Agafem tots els ports del contenidor
                 ports = container.attrs['NetworkSettings']['Ports']
                 # I ens quedem amb el port TCP
-                server.port = ports[f'{MCport}/tcp'][0]['HostPort']
+                if server.game == "Minecraft":
+                    server.port = ports[f'{MCport}/tcp'][0]['HostPort']
+                elif server.game.name == "Valheim":
+                    server.port = ports[f'{ValheimPort[0]}/udp'][0]['HostPort']
                 server.save()
             except DockerException as e:
                 print("[Error] restart_server: " + e.__str__())
