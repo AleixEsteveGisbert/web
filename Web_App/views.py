@@ -1,15 +1,12 @@
 import datetime
-import http
 import json
 import random
 import string
-import sys
 from time import sleep
 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from docker.errors import DockerException
@@ -194,8 +191,6 @@ def getFile(path, container):
 
 
 # Function to update a content of a file in a container
-# TODO
-
 def updateFile(data, path, container):
     try:
         command_write = f'bash -c "echo {data} > {path}"'
