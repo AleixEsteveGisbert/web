@@ -81,22 +81,31 @@ def new_server(request):
                 print("Docker is not running")
                 raise Exception(f"[Error] new_server: {e.__str__()}")
             server.save()
+            cores = ""
+            if server.cores == 1:
+                cores = "0"
+            elif server.cores == 2:
+                cores = "0,1"
+            elif server.cores == 4:
+                cores = "0,1,2"
+
             if server.id < 10:
                 server.delete()
                 server.id = 10
             if server.game.name == "Minecraft":
                 try:
-                    memory_limit = '1G'
+                    print(server.cores)
                     container = client.containers.run(
                         'itzg/minecraft-server',
                         name=server.id,
                         mem_limit=f"{server.ram}g",
+                        cpuset_cpus=cores,
                         ports={f'{MCport}/tcp': None, f'{MCport}/udp': None},
                         environment={
                             'EULA': 'TRUE',
                             'OVERRIDE_SERVER_PROPERTIES': 'false',
                             'VERSION': 'latest',
-                            'MEMORY': memory_limit,
+                            'MEMORY': f'{server.ram}G',
                             'SERVER_NAME': server.name,
                             'MOTD': "Welcome to server " + server.name,
                         },
@@ -131,6 +140,7 @@ def new_server(request):
                         "ghcr.io/lloesche/valheim-server",
                         name=server.id,
                         mem_limit=f"{server.ram}g",
+                        cpuset_cpus=cores,
                         ports={f'{ValheimPort[0]}/udp': None, f'{ValheimPort[1]}/udp': None},
                         cap_add="sys_nice",
                         volumes={
