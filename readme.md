@@ -1,6 +1,9 @@
-# ![GameSave](https://github.com/aleixBY23/web/blob/main/Web_App/static/logo/logo_400x100.png?raw=true)
 
-Descripció
+<div align="center" style="margin-top: 20px">
+  <img src="https://github.com/aleixBY23/web/blob/main/Web_App/static/logo/logo_400x100.png?raw=true" alt="GameSave">
+</div>
+
+Aquest projecte tracta sobre el procés de desenvolupament d’una plataforma web on l’usuari pot comprar servidors per a videojocs que es despleguen automàticament, integrant la nostra pròpia criptomoneda i on l’usuari paga solament pels recursos que necessita.
 
 ## Requisits
 
