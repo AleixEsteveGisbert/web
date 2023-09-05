@@ -14,15 +14,19 @@ Descripció
    ```bash
    git clone https://github.com/aleixBY23/web
 
-2. Ves fins el directori del projecte i instal·la les dependències
+2. Ves fins el directori del projecte
+   ```bash
+   cd web
+   
+3. Instal·la les dependències
    ```bash
    pip install -r requirements.txt
    
-3. Si es necessari, aplica les migracions a la base de dades:
+4. Si es necessari, aplica les migracions a la base de dades:
    ```bash
    python manage.py migrate
    
-4. Ja pots iniciar el servidor web:
+5. Ja pots iniciar el servidor web:
    ```bash
    python manage.py runserver
 
