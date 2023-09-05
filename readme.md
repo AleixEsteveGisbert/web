@@ -1,4 +1,4 @@
-# [GameSave](https://github.com/aleixBY23/web/blob/main/Web_App/static/logo/logo_400x100.png?raw=true)
+# ![GameSave](https://github.com/aleixBY23/web/blob/main/Web_App/static/logo/logo_400x100.png?raw=true)
 
 Descripció
 
