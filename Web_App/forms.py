@@ -31,8 +31,7 @@ class RegisterForm(UserCreationForm):
         user.email = self.cleaned_data['email']
         if commit:
             user.save()
-            wallet = Wallet.objects.create()
-            userInfo = UserInfo.objects.create(user=user, wallet=wallet, avatar='avatars/default_avatar.png')
+            userInfo = UserInfo.objects.create(user=user, avatar='avatars/default_avatar.png')
 
         return user
 
