@@ -37,9 +37,18 @@ Aquest projecte tracta sobre el procés de desenvolupament d’una plataforma we
 
 Pots veure la web a  `http://localhost:8000/`.
 
-## Comprar HostCoin
+## Configuració
 Per a poder comprar un servidor, has de tenir la nostra moneda a la teva cartera, però el projecte es troba en fase de
 desenvolupament, per tant has d'estar a la testnet de Ethereum per a poder operar. Segueix els passos següents:
-1. TODO
-2. TODO
-3. TODO
+
+1. Registrar-se a [Alchemy.com](https://dashboard.alchemy.com/)
+2. Una volta registrat, hem de crear una App anant a `Apps` > `Create new app`
+3. Emplenar els camps amb les dades següents 
+   - `Chain`: Ethereum 
+   - `Network`: Ethereum Sepolia
+   - `Name`: El que vulguis
+   - `Description`: El que vulguis
+4. Una volta creada, entrar a l'app i clicar a `ADD TO WALLET` en la part superior dreta. S'obrirà una finestra de Metamask on haurem de clicar `Approve` > `Approve` > `Switch network`.
+5. Per a aconseguir Ethereums per a poder fer proves, introduïr la nostra direcció de cartera (la qual pots trobar clicant a MetaMask i a la part superior) a [sepoliafaucet](https://sepoliafaucet.com/) on podem rebre 0.5 ETH diaris.
+6. Accedir a la nostra web on MetaMask demanarà accés. Tria la teva cartera, clica `Next` > `Connect`.
+7. Ja pots començar a operar amb el nostre token dins la nostra plataforma.
