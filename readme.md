@@ -4,10 +4,10 @@ Descripció
 
 ## Requisits
 
-- Python (versión 3.10)
-- Django (versión 4.2)
+- Python (versió 3.10)
+- Django (versió 4.2)
 - Altres dependències (veure `requirements.txt`)
-
+- Has de tenir instal·lat docker al teu ordinador [Docker Desktop](https://docs.docker.com/get-docker/)
 ## Instalació
 
 1. Clona el repositori:
@@ -26,4 +26,4 @@ Descripció
    ```bash
    python manage.py runserver
 
-Ja pots veure la web a  `http://localhost:8000/`.
+Pots veure la web a  `http://localhost:8000/`.
