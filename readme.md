@@ -8,6 +8,8 @@ Descripció
 - Django (versió 4.2)
 - Altres dependències (veure `requirements.txt`)
 - Has de tenir instal·lat docker al teu ordinador [Docker Desktop](https://docs.docker.com/get-docker/)
+- La extensió de [MetaMask](https://metamask.io/download/) instal·lada en el teu navegador
+- 
 ## Instalació
 
 1. Clona el repositori:
@@ -31,3 +33,10 @@ Descripció
    python manage.py runserver
 
 Pots veure la web a  `http://localhost:8000/`.
+
+## Comprar HostCoin
+Per a poder comprar un servidor, has de tenir la nostra moneda a la teva cartera, però el projecte es troba en fase de
+desenvolupament, per tant has d'estar a la testnet de Ethereum per a poder operar. Segueix els passos següents:
+1. TODO
+2. TODO
+3. TODO
