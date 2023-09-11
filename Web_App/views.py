@@ -94,7 +94,6 @@ def new_server(request):
                 server.id = 10
             if server.game.name == "Minecraft":
                 try:
-                    print(server.cores)
                     container = client.containers.run(
                         'itzg/minecraft-server',
                         name=server.id,
@@ -104,7 +103,7 @@ def new_server(request):
                         environment={
                             'EULA': 'TRUE',
                             'OVERRIDE_SERVER_PROPERTIES': 'false',
-                            'VERSION': 'latest',
+                            'VERSION': '1.20',
                             'MEMORY': f'{server.ram}G',
                             'SERVER_NAME': server.name,
                             'MOTD': "Welcome to server " + server.name,
