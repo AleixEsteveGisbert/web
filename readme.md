@@ -12,7 +12,7 @@ Aquest projecte tracta sobre el procés de desenvolupament d’una plataforma we
 - Altres dependències (veure `requirements.txt`)
 - Has de tenir instal·lat docker al teu ordinador [Docker Desktop](https://docs.docker.com/get-docker/)
 - La extensió de [MetaMask](https://metamask.io/download/) instal·lada en el teu navegador
-- 
+
 ## Instalació
 
 1. Clona el repositori:
